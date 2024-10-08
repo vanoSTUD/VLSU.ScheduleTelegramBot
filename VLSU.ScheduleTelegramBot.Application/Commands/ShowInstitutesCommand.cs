@@ -5,6 +5,7 @@ using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
+using VLSU.ScheduleTelegramBot.Domain.Enums;
 using VLSU.ScheduleTelegramBot.Domain.Interfaces.Services;
 
 namespace VLSU.ScheduleTelegramBot.Application.Commands;
@@ -34,6 +35,12 @@ public class ShowInstitutesCommand : BaseCommand
 
 		try
 		{
+			if (!Enum.TryParse(typeof(EducationForms), args?[0], out var educationForm))
+			{
+				_logger.LogWarning("Arguments are null in {type}. Args = {args}", nameof(ShowInstitutesCommand), args?.ToString());
+				return;
+			}
+
 			using var scope = _scopeFactory.CreateScope();
 			var vlsuApi = scope.ServiceProvider.GetRequiredService<IVlsuApiService>();
 
@@ -71,14 +78,13 @@ public class ShowInstitutesCommand : BaseCommand
 				if (i == 0 || i % 4 == 0)
 					inlineMarkup.AddNewRow();
 
-				var educationForm = args?[0];
 				var instituteId = institutes[i].Value;
-				var arguments = $"{educationForm} {instituteId}";
+				var arguments = $"{(int)educationForm} {instituteId}";
 
 				inlineMarkup.AddButton(institutes[i].Text, $"{CommandNames.ShowCourses} {arguments}");
 			}
 
-			await _bot.SendTextMessageAsync(message.Chat, "<i>Выберите институт:</i>", replyMarkup: inlineMarkup, parseMode: ParseMode.Html);
+			await _bot.SendTextMessageAsync(message.Chat, "<i>Выберите желаемый институт:</i>", replyMarkup: inlineMarkup, parseMode: ParseMode.Html);
 		}
 		catch (Exception ex)
 		{

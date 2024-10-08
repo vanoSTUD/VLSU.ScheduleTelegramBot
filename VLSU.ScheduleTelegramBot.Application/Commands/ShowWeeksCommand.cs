@@ -53,16 +53,9 @@ public class ShowWeeksCommand : BaseCommand
 				return;
 			}
 
-			var currentWeek = currentInfo.CurrentWeekType;
-			var inlineMarkup = new InlineKeyboardMarkup();
+			var weekType = currentInfo.CurrentWeekType;
 
-			inlineMarkup
-				.AddNewRow().AddButton($"Текущая неделя", $"{CommandNames.ShowSchedule} {groupId} {currentWeek}")
-				.AddNewRow().AddButton($"Следующая неделя", $"{CommandNames.ShowSchedule} {groupId} {(currentWeek == 1 ? 2 : 1)}")
-				.AddNewRow().AddButton($"Предыдущая неделя", $"{CommandNames.ShowSchedule} {groupId} {(currentWeek == 1 ? 2 : 1)}");
-				
-			await _bot.SendTextMessageAsync(message.Chat, $"<i>Выберите неделю для {currentInfo.Name}:</i>", replyMarkup: inlineMarkup, parseMode: ParseMode.Html);
-
+			await ShowScheduleCommand.SendMessageWithButtonsAsync(_bot, message.Chat, $"<i>Выберите неделю для {currentInfo.Name}:</i>", groupId, weekType);
 		}
 		catch (Exception ex)
 		{

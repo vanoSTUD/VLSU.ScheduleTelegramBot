@@ -76,7 +76,7 @@ public class ShowGroupsCommand : BaseCommand
 				inlineMarkup.AddButton(groups[i].Name, $"{CommandNames.ShowWeeks} {arguments}");
 			}
 
-			await _bot.SendTextMessageAsync(message.Chat, "<i>Выберите группу:</i>", replyMarkup: inlineMarkup, parseMode: ParseMode.Html);
+			await _bot.SendTextMessageAsync(message.Chat, "<i>Выберите желаемую группу: </i>", replyMarkup: inlineMarkup, parseMode: ParseMode.Html);
 
 		}
 		catch (Exception ex)

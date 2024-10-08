@@ -2,6 +2,7 @@
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
+using VLSU.ScheduleTelegramBot.Domain.Enums;
 
 namespace VLSU.ScheduleTelegramBot.Application.Commands;
 
@@ -22,9 +23,9 @@ public class StartCommand : BaseCommand
 			return;
 
 		var inlineMarkup = new InlineKeyboardMarkup()
-			.AddNewRow().AddButton("Очная", $"{CommandNames.ShowInstitutes} 0")
-			.AddNewRow().AddButton("Заочная", $"{CommandNames.ShowInstitutes} 1")
-			.AddNewRow().AddButton("Очно-Заочная", $"{CommandNames.ShowInstitutes} 2");
+			.AddNewRow().AddButton("Очная", $"{CommandNames.ShowInstitutes} {(int)EducationForms.FullTime}")
+			.AddNewRow().AddButton("Заочная", $"{CommandNames.ShowInstitutes} {(int)EducationForms.ParteTime}")
+			.AddNewRow().AddButton("Очно-Заочная", $"{CommandNames.ShowInstitutes} {(int)EducationForms.Mixed}");
 
 		await _bot.SendTextMessageAsync(message.Chat, "<i>Выберите форму обучения:</i>", replyMarkup: inlineMarkup, parseMode: ParseMode.Html);
 	}

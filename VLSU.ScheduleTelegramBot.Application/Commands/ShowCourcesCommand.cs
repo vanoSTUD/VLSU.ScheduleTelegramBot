@@ -77,7 +77,7 @@ public class ShowCourcesCommand : BaseCommand
 				inlineMarkup.AddButton($"{cource} курс", $"{CommandNames.ShowGroups} {arguments}");
 			}
 
-			await _bot.SendTextMessageAsync(message.Chat, "<i>Выберите курс:</i>", replyMarkup: inlineMarkup, parseMode: ParseMode.Html);
+			await _bot.SendTextMessageAsync(message.Chat, "<i>Выберите желаемый курс:</i>", replyMarkup: inlineMarkup, parseMode: ParseMode.Html);
 		}
 		catch (Exception ex)
 		{
