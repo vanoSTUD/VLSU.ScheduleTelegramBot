@@ -33,6 +33,8 @@ public class ShowCourcesCommand : BaseCommand
 
 		try
 		{
+			await _bot.AnswerCallbackQueryAsync(callback.Id);
+
 			if (!int.TryParse(args?[0], out int educationForm) ||
 				!long.TryParse(args?[1], out long instituteId))
 			{

@@ -23,6 +23,7 @@ builder.Services.ConfigureTelegramBotMvc();
 
 builder.Services.AddControllers();
 
+
 var app = builder.Build();
 
 app.UseHttpsRedirection();
@@ -31,5 +32,12 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+var bot = app.Services.GetRequiredService<ITelegramBotClient>();
+var webhookUrl = botConfigSection.Get<BotOptions>()!.BotWebhookUrl.AbsoluteUri;
+var secretToken = botConfigSection.Get<BotOptions>()!.SecretToken;
+var ct = new CancellationTokenSource().Token;
+
+await bot.SetWebhookAsync(webhookUrl, allowedUpdates: [], secretToken: secretToken, cancellationToken: ct);
+Console.WriteLine($"Webhook set to {webhookUrl}");
 
 app.Run();

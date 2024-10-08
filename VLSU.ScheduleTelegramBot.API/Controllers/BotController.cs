@@ -10,16 +10,6 @@ namespace VLSU.ScheduleTelegramBot.API;
 [Route("")]
 public class BotController(IOptions<BotOptions> Config) : ControllerBase
 {
-	[HttpGet("setWebhook")]
-	public async Task<string> SetWebHook([FromServices] ITelegramBotClient bot, CancellationToken ct)
-	{
-		var webhookUrl = Config.Value.BotWebhookUrl.AbsoluteUri;
-
-		await bot.SetWebhookAsync(webhookUrl, allowedUpdates: [], secretToken: Config.Value.SecretToken, cancellationToken: ct);
-
-		return $"Webhook set to {webhookUrl}";
-	}
-
 	[HttpPost]
 	public async Task<IActionResult> Post([FromBody] Update update, [FromServices] ITelegramBotClient bot, [FromServices] UpdateHandler handleUpdateService, CancellationToken ct)
 	{

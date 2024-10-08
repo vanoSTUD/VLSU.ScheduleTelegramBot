@@ -33,6 +33,8 @@ public class ShowWeeksCommand : BaseCommand
 
 		try
 		{
+			await _bot.AnswerCallbackQueryAsync(callback.Id);
+
 			if (!long.TryParse(args?[0], out long groupId))
 			{
 				_logger.LogWarning("Agguments are null: {args}", args?.ToString());

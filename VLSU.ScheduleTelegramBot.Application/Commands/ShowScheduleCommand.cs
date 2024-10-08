@@ -34,6 +34,8 @@ public class ShowScheduleCommand : BaseCommand
 
 		try
 		{
+			await _bot.AnswerCallbackQueryAsync(callback.Id);
+
 			if (!long.TryParse(args?[0], out long groupId) ||
 				!int.TryParse(args?[1], out int weekIncrement))
 			{
@@ -163,8 +165,9 @@ public class ShowScheduleCommand : BaseCommand
 		}
 
 		var firstLessonStartTime = new TimeOnly(8, 30);
-		int lessonDuration = 110;
-		var lessonStartTime = firstLessonStartTime.AddMinutes(lessonDuration * (lessonNumber - 1));
+		int lessonDuration = 90;
+		int restDuration = 20;
+		var lessonStartTime = firstLessonStartTime.AddMinutes((lessonDuration + restDuration) * (lessonNumber - 1));
 		var lessonEndTime = lessonStartTime.AddMinutes(lessonDuration);
 
 		builder.AppendLine($"➖<b>{lessonNumber} пара ({lessonStartTime} - {lessonEndTime}): {emoji}</b>");

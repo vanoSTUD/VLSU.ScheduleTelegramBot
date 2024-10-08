@@ -35,9 +35,12 @@ public class ShowInstitutesCommand : BaseCommand
 
 		try
 		{
+			await _bot.AnswerCallbackQueryAsync(callback.Id);
+
 			if (!Enum.TryParse(typeof(EducationForms), args?[0], out var educationForm))
 			{
 				_logger.LogWarning("Arguments are null in {type}. Args = {args}", nameof(ShowInstitutesCommand), args?.ToString());
+
 				return;
 			}
 
@@ -48,8 +51,16 @@ public class ShowInstitutesCommand : BaseCommand
 
 			if (institutes == null)
 			{
-				_logger.LogWarning("institutes are null. Args = {args}", args?.ToString());
 				await _bot.SendTextMessageAsync(message.Chat, "<b>Не удалось отобразить институты. Попробуйте позже</b>", parseMode: ParseMode.Html);
+				_logger.LogWarning("institutes are null. Args = {args}", args?.ToString());
+
+				return;
+			}
+
+			if (institutes.Count == 0)
+			{
+				await _bot.SendTextMessageAsync(message.Chat, "<b>Не удалось отобразить институты. Попробуйте позже</b>", parseMode: ParseMode.Html);
+				_logger.LogDebug("Vlgu api returns count = 0. Args = {args}", args?.ToString());
 
 				return;
 			}
