@@ -1,0 +1,75 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.10.35027.167
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VLSU.ScheduleTelegramBot.Domain", "VLSU.ScheduleTelegramBot.Domain\VLSU.ScheduleTelegramBot.Domain.csproj", "{C0991355-6699-478E-92A6-95DD5ABDD4BD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VLSU.ScheduleTelegramBot.Application", "VLSU.ScheduleTelegramBot.Application\VLSU.ScheduleTelegramBot.Application.csproj", "{5219FF2B-B29C-474F-99B6-6FB6B0E1CE1F}"
+	ProjectSection(ProjectDependencies) = postProject
+		{C0991355-6699-478E-92A6-95DD5ABDD4BD} = {C0991355-6699-478E-92A6-95DD5ABDD4BD}
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Core", "Core", "{0C067762-7BEB-4406-BE67-F4D9607167C8}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Infrastracture", "Infrastracture", "{0CBC0943-071F-4B7C-A9E1-45EFB6FACCFC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VLSU.ScheduleTelegramBot.DAL", "VLSU.ScheduleTelegramBot.DAL\VLSU.ScheduleTelegramBot.DAL.csproj", "{C6CC8691-B3F4-40DC-A35D-03E44E1F4B58}"
+	ProjectSection(ProjectDependencies) = postProject
+		{5219FF2B-B29C-474F-99B6-6FB6B0E1CE1F} = {5219FF2B-B29C-474F-99B6-6FB6B0E1CE1F}
+		{C0991355-6699-478E-92A6-95DD5ABDD4BD} = {C0991355-6699-478E-92A6-95DD5ABDD4BD}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VLSU.ScheduleTelegramBot.VlsuApiService", "VLSU.ScheduleTelegramBot.VlsuApiService\VLSU.ScheduleTelegramBot.VlsuApiService.csproj", "{26BDB741-8813-4703-B964-74740B3106DF}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Web", "Web", "{135CFBEA-4D8E-448C-8E86-8F7B196C687B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VLSU.ScheduleTelegramBot.API", "VLSU.ScheduleTelegramBot.API\VLSU.ScheduleTelegramBot.API.csproj", "{1ADF0C8D-3200-4EC8-81D4-48FEAC320265}"
+	ProjectSection(ProjectDependencies) = postProject
+		{26BDB741-8813-4703-B964-74740B3106DF} = {26BDB741-8813-4703-B964-74740B3106DF}
+		{5219FF2B-B29C-474F-99B6-6FB6B0E1CE1F} = {5219FF2B-B29C-474F-99B6-6FB6B0E1CE1F}
+		{C0991355-6699-478E-92A6-95DD5ABDD4BD} = {C0991355-6699-478E-92A6-95DD5ABDD4BD}
+		{C6CC8691-B3F4-40DC-A35D-03E44E1F4B58} = {C6CC8691-B3F4-40DC-A35D-03E44E1F4B58}
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C0991355-6699-478E-92A6-95DD5ABDD4BD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C0991355-6699-478E-92A6-95DD5ABDD4BD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C0991355-6699-478E-92A6-95DD5ABDD4BD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C0991355-6699-478E-92A6-95DD5ABDD4BD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5219FF2B-B29C-474F-99B6-6FB6B0E1CE1F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5219FF2B-B29C-474F-99B6-6FB6B0E1CE1F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5219FF2B-B29C-474F-99B6-6FB6B0E1CE1F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5219FF2B-B29C-474F-99B6-6FB6B0E1CE1F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C6CC8691-B3F4-40DC-A35D-03E44E1F4B58}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C6CC8691-B3F4-40DC-A35D-03E44E1F4B58}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C6CC8691-B3F4-40DC-A35D-03E44E1F4B58}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C6CC8691-B3F4-40DC-A35D-03E44E1F4B58}.Release|Any CPU.Build.0 = Release|Any CPU
+		{26BDB741-8813-4703-B964-74740B3106DF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{26BDB741-8813-4703-B964-74740B3106DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{26BDB741-8813-4703-B964-74740B3106DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{26BDB741-8813-4703-B964-74740B3106DF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1ADF0C8D-3200-4EC8-81D4-48FEAC320265}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1ADF0C8D-3200-4EC8-81D4-48FEAC320265}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1ADF0C8D-3200-4EC8-81D4-48FEAC320265}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1ADF0C8D-3200-4EC8-81D4-48FEAC320265}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{C0991355-6699-478E-92A6-95DD5ABDD4BD} = {0C067762-7BEB-4406-BE67-F4D9607167C8}
+		{5219FF2B-B29C-474F-99B6-6FB6B0E1CE1F} = {0C067762-7BEB-4406-BE67-F4D9607167C8}
+		{C6CC8691-B3F4-40DC-A35D-03E44E1F4B58} = {0CBC0943-071F-4B7C-A9E1-45EFB6FACCFC}
+		{26BDB741-8813-4703-B964-74740B3106DF} = {0CBC0943-071F-4B7C-A9E1-45EFB6FACCFC}
+		{1ADF0C8D-3200-4EC8-81D4-48FEAC320265} = {135CFBEA-4D8E-448C-8E86-8F7B196C687B}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {C9FD8CE6-589D-47C1-A656-8E5A50DFA5E1}
+	EndGlobalSection
+EndGlobal
