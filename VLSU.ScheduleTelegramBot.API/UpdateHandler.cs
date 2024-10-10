@@ -1,9 +1,12 @@
 ﻿using Telegram.Bot.Exceptions;
-using Telegram.Bot.Polling;
 using Telegram.Bot.Types.ReplyMarkups;
-using Telegram.Bot.Types;
 using Telegram.Bot;
+using Telegram.Bot.Types;
 using VLSU.ScheduleTelegramBot.Application.Commands;
+using VLSU.ScheduleTelegramBot.Domain.Interfaces.Services;
+using VLSU.ScheduleTelegramBot.Domain.Dto;
+using Telegram.Bot.Polling;
+
 
 namespace VLSU.ScheduleTelegramBot.API;
 
@@ -11,22 +14,20 @@ public class UpdateHandler : IUpdateHandler
 {
 	private readonly ITelegramBotClient _bot;
 	private readonly ILogger<UpdateHandler> _logger;
-	private readonly IServiceProvider _serviceProvider;
 	private readonly IServiceScopeFactory _scopeFactory;
 
 	private readonly List<BaseCommand> _commands;
 
-	public UpdateHandler(ITelegramBotClient bot, ILogger<UpdateHandler> logger, IServiceScopeFactory scopeFactory, IServiceProvider serviceProvider)
-	{
-		_bot = bot;
-		_logger = logger;
-		_scopeFactory = scopeFactory;
-		_serviceProvider = serviceProvider;
+    public UpdateHandler(ITelegramBotClient bot, ILogger<UpdateHandler> logger, IServiceProvider serviceProvider, IServiceScopeFactory scopeFactory)
+    {
+        _bot = bot;
+        _logger = logger;
+        _scopeFactory = scopeFactory;
 
-		_commands = serviceProvider.GetServices<BaseCommand>().ToList();
-	}
+        _commands = serviceProvider.GetServices<BaseCommand>().ToList();
+    }
 
-	public async Task HandleErrorAsync(ITelegramBotClient botClient, Exception exception, HandleErrorSource source, CancellationToken cancellationToken)
+    public async Task HandleErrorAsync(ITelegramBotClient botClient, Exception exception, HandleErrorSource source, CancellationToken cancellationToken)
 	{
 		_logger.LogInformation("HandleError: {Exception}", exception);
 
@@ -52,6 +53,16 @@ public class UpdateHandler : IUpdateHandler
 		if (message.Text is not { } messageText)
 			return;
 
+		using var scope = _scopeFactory.CreateScope();
+		var userService = scope.ServiceProvider.GetRequiredService<IAppUserService>();
+		var user = await userService.GetOrCreateAsync(message.Chat.Id);
+
+        if (user.LooksAtTeachers)
+		{
+            await _commands.First(command => command.Name == CommandNames.ShowTeachersCount).ExecuteAsync(update);
+			return;
+        }
+
 		if (messageText.StartsWith('/'))
 		{
 			string commandName = messageText.Split(' ')[0];
@@ -60,7 +71,7 @@ public class UpdateHandler : IUpdateHandler
 		}
 		else
 		{
-			await _commands.First(command => command.Name == CommandNames.Start).ExecuteAsync(update);
+			await _commands.First(command => command.Name == CommandNames.Undefind).ExecuteAsync(update);
 		}
 	}
 
@@ -72,7 +83,9 @@ public class UpdateHandler : IUpdateHandler
 		if (callback.Data is not { } data)
 			return;
 
-		await ExecuteCommand(data, update);
+        await ExecuteCommand(data, update);
+
+        await _bot.AnswerCallbackQueryAsync(callback.Id);
 	}
 
 	private async Task ExecuteCommand(string command, Update update)
@@ -80,9 +93,12 @@ public class UpdateHandler : IUpdateHandler
 		var foundedCommand = _commands.FirstOrDefault(c => c.Name == command.Split(' ')[0]);
 
 		if (foundedCommand == null)
+		{
+            await _commands.First(command => command.Name == CommandNames.Undefind).ExecuteAsync(update);
 			return;
+		}
 
-		var args = command.Split(' ').Skip(1).ToArray();
+        var args = command.Split(' ').Skip(1).ToArray();
 
 		await foundedCommand.ExecuteAsync(update, args);
 	}

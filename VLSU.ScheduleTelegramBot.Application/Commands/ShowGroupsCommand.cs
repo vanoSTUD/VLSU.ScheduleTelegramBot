@@ -4,6 +4,7 @@ using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
+using VLSU.ScheduleTelegramBot.Domain.Enums;
 using VLSU.ScheduleTelegramBot.Domain.Interfaces.Services;
 
 namespace VLSU.ScheduleTelegramBot.Application.Commands;
@@ -31,11 +32,8 @@ public class ShowGroupsCommand : BaseCommand
 		if (callback.Message is not { } message)
 			return;
 
-
 		try
 		{
-			await _bot.AnswerCallbackQueryAsync(callback.Id);
-
 			if (!int.TryParse(args?[0], out int educationForm) ||
 				!long.TryParse(args?[1], out long instituteId) ||
 				args?[2] is not { } course ) 
@@ -73,12 +71,14 @@ public class ShowGroupsCommand : BaseCommand
 					inlineMarkup.AddNewRow();
 
 				var groupId = groups[i].Nrec;
-				var arguments = $"{groupId}";
+				var arguments = $"{groupId} {Roles.Group}";
 
 				inlineMarkup.AddButton(groups[i].Name, $"{CommandNames.ShowWeeks} {arguments}");
 			}
 
-			await _bot.SendTextMessageAsync(message.Chat, "<i>Выберите желаемую группу: </i>", replyMarkup: inlineMarkup, parseMode: ParseMode.Html);
+			var responceMessage = "Выбери желаемую группу: ";
+
+            await _bot.SendTextMessageAsync(message.Chat, responceMessage, replyMarkup: inlineMarkup, parseMode: ParseMode.Html);
 
 		}
 		catch (Exception ex)

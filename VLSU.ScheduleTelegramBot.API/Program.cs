@@ -2,10 +2,12 @@ using Telegram.Bot;
 using VLSU.ScheduleTelegramBot.API;
 using VLSU.ScheduleTelegramBot.API.Settings;
 using VLSU.ScheduleTelegramBot.Application;
+using VLSU.ScheduleTelegramBot.DAL;
 using VLSU.ScheduleTelegramBot.VlsuApiService;
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
+var connectionString = configuration.GetConnectionString("MSSql")!;
 var botConfigSection = configuration.GetSection(BotOptions.Section);
 
 builder.Services.Configure<BotOptions>(botConfigSection);
@@ -16,13 +18,12 @@ builder.Services.AddHttpClient("tgwebhook").RemoveAllLoggers().AddTypedClient<IT
 
 builder.Services.AddApplicationServices();
 builder.Services.AddVlguApiService();
+builder.Services.AddMSSqlDbContext(connectionString);
 
 builder.Services.AddSingleton<UpdateHandler>();
-
 builder.Services.ConfigureTelegramBotMvc();
 
 builder.Services.AddControllers();
-
 
 var app = builder.Build();
 

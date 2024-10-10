@@ -35,11 +35,9 @@ public class ShowInstitutesCommand : BaseCommand
 
 		try
 		{
-			await _bot.AnswerCallbackQueryAsync(callback.Id);
-
 			if (!Enum.TryParse(typeof(EducationForms), args?[0], out var educationForm))
 			{
-				_logger.LogWarning("Arguments are null in {type}. Args = {args}", nameof(ShowInstitutesCommand), args?.ToString());
+				_logger.LogWarning("Argument is not {type}. Args = {args}", nameof(EducationForms), args?.ToString());
 
 				return;
 			}
@@ -52,7 +50,7 @@ public class ShowInstitutesCommand : BaseCommand
 			if (institutes == null)
 			{
 				await _bot.SendTextMessageAsync(message.Chat, "<b>Не удалось отобразить институты. Попробуйте позже</b>", parseMode: ParseMode.Html);
-				_logger.LogWarning("institutes are null. Args = {args}", args?.ToString());
+				_logger.LogWarning("Institutes are null. Args = {args}", args?.ToString());
 
 				return;
 			}
@@ -60,26 +58,9 @@ public class ShowInstitutesCommand : BaseCommand
 			if (institutes.Count == 0)
 			{
 				await _bot.SendTextMessageAsync(message.Chat, "<b>Не удалось отобразить институты. Попробуйте позже</b>", parseMode: ParseMode.Html);
-				_logger.LogDebug("Vlgu api returns count = 0. Args = {args}", args?.ToString());
+				_logger.LogDebug("Vlsu api returns count = 0. Args = {args}", args?.ToString());
 
 				return;
-			}
-
-			foreach (var institute in institutes)
-			{
-				var instituteFullName = institute.Text;
-				var splitName = instituteFullName.Split(' ');
-				var resultName = new StringBuilder();
-
-				foreach (var word in splitName)
-				{
-					if (word.Length > 1)
-						resultName.Append(word[0].ToString().ToUpper());
-					else
-						resultName.Append(word);
-				}
-
-				institute.Text = resultName.ToString();
 			}
 
 			var inlineMarkup = new InlineKeyboardMarkup();
@@ -92,10 +73,12 @@ public class ShowInstitutesCommand : BaseCommand
 				var instituteId = institutes[i].Value;
 				var arguments = $"{(int)educationForm} {instituteId}";
 
-				inlineMarkup.AddButton(institutes[i].Text, $"{CommandNames.ShowCourses} {arguments}");
+				inlineMarkup.AddButton(institutes[i].GetShortName(), $"{CommandNames.ShowCourses} {arguments}");
 			}
 
-			await _bot.SendTextMessageAsync(message.Chat, "<i>Выберите желаемый институт:</i>", replyMarkup: inlineMarkup, parseMode: ParseMode.Html);
+			var responceMessage = "Выбери желаемый институт: ";
+
+            await _bot.SendTextMessageAsync(message.Chat, responceMessage, replyMarkup: inlineMarkup, parseMode: ParseMode.Html);
 		}
 		catch (Exception ex)
 		{

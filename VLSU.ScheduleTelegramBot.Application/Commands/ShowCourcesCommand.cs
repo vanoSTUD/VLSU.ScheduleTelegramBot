@@ -33,8 +33,6 @@ public class ShowCourcesCommand : BaseCommand
 
 		try
 		{
-			await _bot.AnswerCallbackQueryAsync(callback.Id);
-
 			if (!int.TryParse(args?[0], out int educationForm) ||
 				!long.TryParse(args?[1], out long instituteId))
 			{
@@ -56,9 +54,7 @@ public class ShowCourcesCommand : BaseCommand
 				return;
 			}
 
-			int maxCourse;
-
-			if (!int.TryParse(groups.Max(g => g.Course.Split(' ')[0]), out maxCourse))
+			if (!int.TryParse(groups.Max(g => g.Course.Split(' ')[0]), out int maxCourse))
 			{
 				_logger.LogWarning("The course number could not be converted: {args}", args?.ToString());
 				await _bot.SendTextMessageAsync(message.Chat, "<b>Не удалось отобразить курсы. Попробуйте позже</b>", parseMode: ParseMode.Html);
@@ -79,11 +75,13 @@ public class ShowCourcesCommand : BaseCommand
 				inlineMarkup.AddButton($"{cource} курс", $"{CommandNames.ShowGroups} {arguments}");
 			}
 
-			await _bot.SendTextMessageAsync(message.Chat, "<i>Выберите желаемый курс:</i>", replyMarkup: inlineMarkup, parseMode: ParseMode.Html);
+			var responceMessage = "Выбери желаемый курс:";
+
+            await _bot.SendTextMessageAsync(message.Chat, responceMessage, replyMarkup: inlineMarkup, parseMode: ParseMode.Html);
 		}
 		catch (Exception ex)
 		{
-			_logger.LogError(ex, "Exception on ShowInstitutesCommand.ExecuteAsync()");
+			_logger.LogError(ex, "Exception in ShowCourcesCommand.ExecuteAsync()");
 
 			await _bot.SendTextMessageAsync(message.Chat, "<b>Не удалось отобразить курсы. Попробуйте позже</b>", parseMode: ParseMode.Html);
 		}
