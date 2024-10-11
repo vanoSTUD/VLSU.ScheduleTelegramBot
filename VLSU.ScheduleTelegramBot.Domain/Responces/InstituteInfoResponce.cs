@@ -1,16 +1,16 @@
 ﻿using System.Text;
 
-namespace VLSU.ScheduleTelegramBot.Domain.Contracts;
+namespace VLSU.ScheduleTelegramBot.Domain.Responces;
 
-public class Institute
+public class InstituteInfoResponce
 {
-    public long Id { get; set; } = default;
-    public string Name { get; set; } = string.Empty;
+    public long Value { get; set; } = default;
+    public string Text { get; set; } = string.Empty;
 
 
     public string GetShortName()
     {
-        var splitName = Name.Split(' ');
+        var splitName = Text.Split(' ');
         var shortName = new StringBuilder();
 
         foreach (var word in splitName)

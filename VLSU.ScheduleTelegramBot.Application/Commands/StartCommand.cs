@@ -19,14 +19,24 @@ public class StartCommand : BaseCommand
 
 	public override async Task ExecuteAsync(Update update, string[]? args = default)
 	{
-		if (update.Message is not { } message)
+		Message? message = null;
+
+		if (update.Message is not null)
+			message = update.Message;
+		else if (update?.CallbackQuery?.Message is not null)
+			message = update.CallbackQuery.Message;
+
+		if (message == null)
 			return;
 
-		var inlineMarkup = new InlineKeyboardMarkup()
-			.AddNewRow().AddButton("Очная", $"{CommandNames.ShowInstitutes} {(int)EducationForms.FullTime}")
-			.AddNewRow().AddButton("Заочная", $"{CommandNames.ShowInstitutes} {(int)EducationForms.ParteTime}")
-			.AddNewRow().AddButton("Очно-Заочная", $"{CommandNames.ShowInstitutes} {(int)EducationForms.Mixed}");
+		var userName = message.From?.FirstName;
+		string responceMessage = $"Привет{(userName is null ? "" : $", <b>{userName}</b>")}!\n";
+        responceMessage += "Чье расписание смотрим?";
 
-		await _bot.SendTextMessageAsync(message.Chat, "<i>Выберите форму обучения:</i>", replyMarkup: inlineMarkup, parseMode: ParseMode.Html);
+		var inlineMarkup = new InlineKeyboardMarkup()
+			.AddNewRow().AddButton("Студента", $"{CommandNames.FormEducation}")
+			.AddNewRow().AddButton("Преподавателя", $"{CommandNames.FindTeacher}");
+
+		await _bot.SendTextMessageAsync(message.Chat, responceMessage, replyMarkup: inlineMarkup, parseMode: ParseMode.Html);
 	}
 }

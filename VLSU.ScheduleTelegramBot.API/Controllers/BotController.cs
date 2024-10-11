@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Options;
 using Telegram.Bot;
 using Telegram.Bot.Types;
-using VLSU.ScheduleTelegramBot.API.Settings;
+using VLSU.ScheduleTelegramBot.Domain.Options;
 
 namespace VLSU.ScheduleTelegramBot.API;
 

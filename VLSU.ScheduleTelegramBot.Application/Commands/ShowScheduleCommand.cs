@@ -6,6 +6,11 @@ using Telegram.Bot.Types;
 using Telegram.Bot;
 using VLSU.ScheduleTelegramBot.Domain.Interfaces.Services;
 using System.Text;
+using VLSU.ScheduleTelegramBot.Domain.Enums;
+using VLSU.ScheduleTelegramBot.Domain.Contracts;
+using VLSU.ScheduleTelegramBot.Domain.Responces;
+using VLSU.ScheduleTelegramBot.Domain.Entities;
+using VLSU.ScheduleTelegramBot.Application.Commands.Group;
 
 namespace VLSU.ScheduleTelegramBot.Application.Commands;
 
@@ -34,10 +39,11 @@ public class ShowScheduleCommand : BaseCommand
 
 		try
 		{
-			await _bot.AnswerCallbackQueryAsync(callback.Id);
-
-			if (!long.TryParse(args?[0], out long groupId) ||
-				!int.TryParse(args?[1], out int weekIncrement))
+			if (args == null ||
+				args.Length < 3 ||
+				!long.TryParse(args[0], out long id) ||
+				!Enum.TryParse(typeof(EducationWeekTypes), args[1], out var educationWeekType) ||
+                !Enum.TryParse(typeof(Roles), args[2], out var role))
 			{
 				_logger.LogWarning("Agguments are null: {args}", args?.ToString());
 				await _bot.SendTextMessageAsync(message.Chat, "<b>Не удалось отобразить расписание. Попробуйте позже</b>", parseMode: ParseMode.Html);
@@ -47,80 +53,61 @@ public class ShowScheduleCommand : BaseCommand
 
 			using var scope = _scopeFactory.CreateScope();
 			var vlsuApi = scope.ServiceProvider.GetRequiredService<IVlsuApiService>();
-			var groupInfo = await vlsuApi.GetCurrentInfo(groupId);
 
-			if (groupInfo == null)
+			var schedule = await vlsuApi.GetScheduleAsync(id, (Roles)role);
+			var currentInfo = await vlsuApi.GetCurrentInfoAsync(id, (Roles)role);
+
+            if (schedule == null)
 			{
-				_logger.LogWarning("Vlsu Api returns null: {args}", args?.ToString());
-				await _bot.SendTextMessageAsync(message.Chat, "<b>Не удалось получить информацию о группе</b>", parseMode: ParseMode.Html);
+				_logger.LogWarning("Vlsu Api returns null: Id = {id}, Role = {role}", id, role);
+				await _bot.SendTextMessageAsync(message.Chat, $"<b>Расписание на эту неделю не найдено</b>", parseMode: ParseMode.Html);
 
 				return;
 			}
 
-			var weekType = groupInfo.CurrentWeekType;
-			var schedule = await vlsuApi.GetScheduleAsync(groupId, weekType);
-
-			if (schedule == null)
+			if (currentInfo == null)
 			{
-				_logger.LogWarning("Vlsu Api returns null: {args}", args?.ToString());
-				await _bot.SendTextMessageAsync(message.Chat, $"<b>Не удалось отобразить расписание {groupInfo.Name}. Попробуйте позже</b>", parseMode: ParseMode.Html);
+                _logger.LogError("Vlsu Api returns null: Id = {id}", id);
+                await _bot.SendTextMessageAsync(message.Chat, $"<b>Ошибка в получении расписания :( \nПопробуйте позже</b>", parseMode: ParseMode.Html);
 
-				return;
-			}
-
-			if (schedule.Count == 0)
-			{
-				await _bot.SendTextMessageAsync(message.Chat, $"<b>Расписание {groupInfo.Name} на эту неделю не найдено</b>", parseMode: ParseMode.Html);
-
-				return;
-			}
+                return;
+            }
 
 			DateTime today = DateTime.Today;
 			DateTime weekBegin = today.AddDays(-(int)today.DayOfWeek).AddDays(1);
 			DateTime weekEnd = weekBegin.AddDays(6);
 			string weekName = "Текущая неделя";
 
-			if (weekIncrement != 0)
+            if ((int)educationWeekType != currentInfo.CurrentWeekType)
 			{
-				weekBegin = weekBegin.AddDays(7 * weekIncrement);
-				weekEnd = weekEnd.AddDays(7 * weekIncrement);
-				weekName = weekIncrement == 1 ? "Следующая неделя" : "Предыдущая неделя";
-
-				weekType = weekType == 1 ? 2 : 1;
+				weekBegin = weekBegin.AddDays(7);
+				weekEnd = weekEnd.AddDays(7);
+				weekName = "Следующая неделя";
 			}
 
-			var result = new StringBuilder($"Расписание для <b>{groupInfo?.Name}.</b> \n");
-			result.AppendLine($"Тип недели: <b>{(weekType == 1 ? "Числитель" : "Знаменатель")}</b>.");
-			result.AppendLine($"Дата: <b>{weekBegin.ToString("d")} - {weekEnd.ToString("d")}</b>.");
-			result.AppendLine($"({weekName})");
+			string educationWeekTypeName = (EducationWeekTypes)educationWeekType == EducationWeekTypes.Nominator ? "Числитель" : "Знаменатель";
 
-			foreach (var scheduleItem in schedule)
+            var responceMessage = new StringBuilder($"Расписание для <b>{currentInfo?.Name}.</b> \n");
+			responceMessage.AppendLine($"Тип недели: <b>{educationWeekTypeName}</b>.");
+			responceMessage.AppendLine($"Дата: <b>{weekBegin.ToString("d")} - {weekEnd.ToString("d")}</b>.");
+			responceMessage.AppendLine($"({weekName})");
+
+			var currentSchedules = schedule.GetSchedules((EducationWeekTypes)educationWeekType);
+
+			foreach ( var currentSchedule in currentSchedules)
 			{
-				result.AppendLine($"\n<blockquote expandable><u>{scheduleItem.name}</u>");
+                responceMessage.AppendLine($"\n<blockquote expandable><u>{currentSchedule.DayOfWeek}</u>");
+				var lessons = currentSchedule.Lessons;
 
-				if (weekType == 1)
+				foreach ( var lesson in lessons )
 				{
-					AppendLessonIfNotNull(result, scheduleItem.n1, 1);
-					AppendLessonIfNotNull(result, scheduleItem.n2, 2);
-					AppendLessonIfNotNull(result, scheduleItem.n3, 3);
-					AppendLessonIfNotNull(result, scheduleItem.n4, 4);
-					AppendLessonIfNotNull(result, scheduleItem.n5, 5);
-					AppendLessonIfNotNull(result, scheduleItem.n6, 6);
-				}
-				if (weekType == 2)
-				{
-					AppendLessonIfNotNull(result, scheduleItem.z1, 1);
-					AppendLessonIfNotNull(result, scheduleItem.z2, 2);
-					AppendLessonIfNotNull(result, scheduleItem.z3, 3);
-					AppendLessonIfNotNull(result, scheduleItem.z4, 4);
-					AppendLessonIfNotNull(result, scheduleItem.z5, 5);
-					AppendLessonIfNotNull(result, scheduleItem.z6, 6);
-				}
+                    AppendLesson(responceMessage, lesson, lesson.Number);
+                }
 
-				result.Append("</blockquote>");
-			}
+                responceMessage.Append("</blockquote>");
+            }
 
-			await SendMessageWithButtonsAsync(_bot, message.Chat.Id, result.ToString(), groupId, weekType);
+			await SendMessageWithButtonsAsync(_bot, message.Chat.Id, responceMessage.ToString(), id, (Roles)role, (EducationWeekTypes)currentInfo!.CurrentWeekType);
 
 		}
 		catch (Exception ex)
@@ -131,27 +118,36 @@ public class ShowScheduleCommand : BaseCommand
 		}
 	}
 
-	public static async Task SendMessageWithButtonsAsync(ITelegramBotClient bot, ChatId chatId, string message, long groupId, int weekType)
+	public static async Task SendMessageWithButtonsAsync(ITelegramBotClient bot, ChatId chatId, string message, long id, Roles role, EducationWeekTypes currentEducationWeekType)
 	{
-		var inlineMarkup = new InlineKeyboardMarkup()
-			.AddNewRow().AddButton($"Текущая неделя", $"{CommandNames.ShowSchedule} {groupId} 0")
-			.AddNewRow().AddButton($"Предыдущая неделя", $"{CommandNames.ShowSchedule} {groupId} -1")
-						.AddButton($"Следующая неделя", $"{CommandNames.ShowSchedule} {groupId} 1");
+		var nextEducationWeekType = currentEducationWeekType == EducationWeekTypes.Denominator ? EducationWeekTypes.Nominator : EducationWeekTypes.Denominator;
+		var inlineMarkup = new InlineKeyboardMarkup();
+		inlineMarkup
+			.AddNewRow().AddButton($"Текущая неделя", $"{CommandNames.ShowSchedule} {id} {currentEducationWeekType} {role}")
+			.AddNewRow().AddButton($"Следующая неделя", $"{CommandNames.ShowSchedule} {id} {nextEducationWeekType} {role}");
 
 		await bot.SendTextMessageAsync(chatId, message, replyMarkup: inlineMarkup, parseMode: ParseMode.Html);
 	}
 
-	private void AppendLessonIfNotNull(StringBuilder builder, string lessonDescription, int lessonNumber)
+	private static void AppendLesson(StringBuilder builder, Lesson lesson, int lessonNumber)
 	{
-		if (string.IsNullOrEmpty(lessonDescription))
+		if (lesson == null)
 			return;
 
-		//🔬📝📌🛠
-		//str.Substring(0, str.IndexOf('^'));
-		string lessonType = lessonDescription.Substring(0, lessonDescription.IndexOf(','));
-		string emoji = string.Empty;
+		string[] sportLessonNames = { "Элективные дисциплины по физической культуре и спорту", "Физическая культура и спорт" };
+		string defaultLessonType = "лк";
+		string lessonType = defaultLessonType;
 
-		switch (lessonType)
+        if (lesson.Description.Contains(','))
+		{
+			var lessonDescriptionSplit = lesson.Description.Split(',');
+			lessonType = lessonDescriptionSplit[0];
+        }
+
+        //🔬📝📌🛠🤸‍♀️
+		string emoji = "📝";
+
+        switch (lessonType)
 		{
 			case "лк":
 				emoji = "📝";
@@ -164,13 +160,17 @@ public class ShowScheduleCommand : BaseCommand
 				break;
 		}
 
-		var firstLessonStartTime = new TimeOnly(8, 30);
+		foreach(var lessonName in sportLessonNames)
+            if (lesson.Description.Contains(lessonName))
+                emoji = "🤸‍♀️";
+
+        var firstLessonStartTime = new TimeOnly(8, 30);
 		int lessonDuration = 90;
 		int restDuration = 20;
 		var lessonStartTime = firstLessonStartTime.AddMinutes((lessonDuration + restDuration) * (lessonNumber - 1));
 		var lessonEndTime = lessonStartTime.AddMinutes(lessonDuration);
 
 		builder.AppendLine($"➖<b>{lessonNumber} пара ({lessonStartTime} - {lessonEndTime}): {emoji}</b>");
-		builder.AppendLine($"<i>{lessonDescription}</i>");
+		builder.AppendLine($"<i>{lesson.Description}</i>");
 	}
 }
