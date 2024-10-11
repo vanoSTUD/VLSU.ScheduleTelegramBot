@@ -4,9 +4,7 @@ using Telegram.Bot;
 using Telegram.Bot.Types;
 using VLSU.ScheduleTelegramBot.Application.Commands;
 using VLSU.ScheduleTelegramBot.Domain.Interfaces.Services;
-using VLSU.ScheduleTelegramBot.Domain.Dto;
 using Telegram.Bot.Polling;
-
 
 namespace VLSU.ScheduleTelegramBot.API;
 
@@ -57,19 +55,18 @@ public class UpdateHandler : IUpdateHandler
 		var userService = scope.ServiceProvider.GetRequiredService<IAppUserService>();
 		var user = await userService.GetOrCreateAsync(message.Chat.Id);
 
-        if (user.LooksAtTeachers)
-		{
-            await _commands.First(command => command.Name == CommandNames.ShowTeachersCount).ExecuteAsync(update);
-			return;
-        }
-
 		if (messageText.StartsWith('/'))
 		{
 			string commandName = messageText.Split(' ')[0];
 
 			await ExecuteCommand(commandName, update);
 		}
-		else
+        else if (user.LooksAtTeachers)
+        {
+            await _commands.First(command => command.Name == CommandNames.ShowTeachersCount).ExecuteAsync(update);
+            return;
+        }
+        else
 		{
 			await _commands.First(command => command.Name == CommandNames.Undefind).ExecuteAsync(update);
 		}

@@ -1,6 +1,10 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using VLSU.ScheduleTelegramBot.Application.Commands;
+using VLSU.ScheduleTelegramBot.Application.Commands.Group;
+using VLSU.ScheduleTelegramBot.Application.Commands.Teacher;
+using VLSU.ScheduleTelegramBot.Application.Mappings.CustomMappers;
 using VLSU.ScheduleTelegramBot.Application.Services;
+using VLSU.ScheduleTelegramBot.Domain.Interfaces.Mappings;
 using VLSU.ScheduleTelegramBot.Domain.Interfaces.Services;
 
 namespace VLSU.ScheduleTelegramBot.Application;
@@ -10,7 +14,8 @@ public static class DependencyInjection
 	public static void AddApplicationServices(this IServiceCollection services)
 	{
 		services.AddScoped<IAppUserService, AppUserService>();
-		services.AddScoped<IScheduleService, ScheduleService>();
+
+		services.AddScoped<IScheduleMapper, SheduleMapper>();
 
 		services.AddSingleton<BaseCommand, StartCommand>();
 		services.AddSingleton<BaseCommand, ShowInstitutesCommand>();

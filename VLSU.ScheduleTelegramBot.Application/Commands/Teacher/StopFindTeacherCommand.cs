@@ -6,7 +6,7 @@ using Telegram.Bot;
 using VLSU.ScheduleTelegramBot.Domain.Dto;
 using VLSU.ScheduleTelegramBot.Domain.Interfaces.Services;
 
-namespace VLSU.ScheduleTelegramBot.Application.Commands;
+namespace VLSU.ScheduleTelegramBot.Application.Commands.Teacher;
 
 public class StopFindTeacherCommand : BaseCommand
 {

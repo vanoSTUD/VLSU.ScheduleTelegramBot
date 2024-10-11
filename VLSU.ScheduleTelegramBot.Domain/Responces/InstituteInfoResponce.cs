@@ -1,8 +1,8 @@
 ﻿using System.Text;
 
-namespace VLSU.ScheduleTelegramBot.Domain.Contracts;
+namespace VLSU.ScheduleTelegramBot.Domain.Responces;
 
-public class Institute
+public class InstituteInfoResponce
 {
     public long Value { get; set; } = default;
     public string Text { get; set; } = string.Empty;

@@ -1,13 +1,12 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using VLSU.ScheduleTelegramBot.Domain.Interfaces.Services;
+using Microsoft.Extensions.DependencyInjection;
+using Telegram.Bot.Types.ReplyMarkups;
 using Microsoft.Extensions.Logging;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types;
 using Telegram.Bot;
-using VLSU.ScheduleTelegramBot.Domain.Dto;
-using VLSU.ScheduleTelegramBot.Domain.Interfaces.Services;
-using Telegram.Bot.Types.ReplyMarkups;
 
-namespace VLSU.ScheduleTelegramBot.Application.Commands;
+namespace VLSU.ScheduleTelegramBot.Application.Commands.Teacher;
 
 public class ShowTeachersCountCommand : BaseCommand
 {
@@ -32,7 +31,8 @@ public class ShowTeachersCountCommand : BaseCommand
         if (message.Text is not { } userText)
             return;
 
-        var failMarkup = new InlineKeyboardMarkup().AddNewRow().AddButton($"Остановить поиск преподавателя", CommandNames.StopFindTeachers);
+        var stopButton = InlineKeyboardButton.WithCallbackData($"Остановить поиск преподавателя", CommandNames.StopFindTeachers);
+        var stopMarkup = new InlineKeyboardMarkup().AddNewRow().AddButton(stopButton);
 
         try
         {
@@ -52,14 +52,13 @@ public class ShowTeachersCountCommand : BaseCommand
 
             if (teachers == null)
             {
-                await _bot.SendTextMessageAsync(message.Chat, "Не удалось получить данные :( \nПопробуйте позже", replyMarkup: failMarkup);
+                await _bot.SendTextMessageAsync(message.Chat, "Не удалось получить данные :( \nПопробуйте позже", replyMarkup: stopMarkup);
                 return;
             }
 
             if (teachers.Count == 0)
             {
-                
-                await _bot.SendTextMessageAsync(message.Chat, $"Препрдаватели с совпадением '{userText}' не найдены", replyMarkup: failMarkup);
+                await _bot.SendTextMessageAsync(message.Chat, $"Препрдаватели с совпадением '{userText}' не найдены", replyMarkup: stopMarkup);
                 return;
             }
 
@@ -71,7 +70,9 @@ public class ShowTeachersCountCommand : BaseCommand
                 responceMessage += "Можешь их открыть, нажав на кнопку ниже";
 
             string buttonArgs = userText;
-            var inlineMarkup = new InlineKeyboardMarkup().AddNewRow().AddButton($"Открыть", $"{CommandNames.ShowTeachers} {buttonArgs}");
+            var inlineMarkup = new InlineKeyboardMarkup()
+                .AddNewRow().AddButton($"Открыть", $"{CommandNames.ShowTeachers} {buttonArgs}")
+                .AddNewRow().AddButton(stopButton);
 
             await _bot.SendTextMessageAsync(message.Chat, responceMessage, replyMarkup: inlineMarkup, parseMode: ParseMode.Html);
         }
@@ -79,7 +80,7 @@ public class ShowTeachersCountCommand : BaseCommand
         {
             _logger.LogError(ex, "Exception in {Class}.{Method}, Message: {Message}", nameof(ShowTeachersCountCommand), nameof(ExecuteAsync), ex.Message);
 
-            await _bot.SendTextMessageAsync(message.Chat, "Не удалось получить данные от сервера :( \nПопробуйте позже", replyMarkup: failMarkup);
+            await _bot.SendTextMessageAsync(message.Chat, "Не удалось получить данные от сервера :( \nПопробуйте позже", replyMarkup: stopMarkup);
         }
     }
 }

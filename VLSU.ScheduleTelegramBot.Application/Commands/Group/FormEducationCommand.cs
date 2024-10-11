@@ -4,7 +4,7 @@ using Telegram.Bot.Types;
 using Telegram.Bot;
 using VLSU.ScheduleTelegramBot.Domain.Enums;
 
-namespace VLSU.ScheduleTelegramBot.Application.Commands;
+namespace VLSU.ScheduleTelegramBot.Application.Commands.Group;
 
 public class FormEducationCommand : BaseCommand
 {

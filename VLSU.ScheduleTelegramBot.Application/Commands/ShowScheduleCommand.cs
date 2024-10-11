@@ -10,6 +10,7 @@ using VLSU.ScheduleTelegramBot.Domain.Enums;
 using VLSU.ScheduleTelegramBot.Domain.Contracts;
 using VLSU.ScheduleTelegramBot.Domain.Responces;
 using VLSU.ScheduleTelegramBot.Domain.Entities;
+using VLSU.ScheduleTelegramBot.Application.Commands.Group;
 
 namespace VLSU.ScheduleTelegramBot.Application.Commands;
 
@@ -52,15 +53,9 @@ public class ShowScheduleCommand : BaseCommand
 
 			using var scope = _scopeFactory.CreateScope();
 			var vlsuApi = scope.ServiceProvider.GetRequiredService<IVlsuApiService>();
-			var scheduleService = scope.ServiceProvider.GetRequiredService<IScheduleService>();
 
-			var schedule = await scheduleService.GetScheduleAsync(id, (Roles)role);
-			CurrentInfo? currentInfo = null;
-
-			if ((Roles)role == Roles.Teacher)
-				currentInfo = await vlsuApi.GetTeacherInfoAsync(id);
-			else if ((Roles)role == Roles.Group)
-				currentInfo = await vlsuApi.GetGroupInfoAsync(id);
+			var schedule = await vlsuApi.GetScheduleAsync(id, (Roles)role);
+			var currentInfo = await vlsuApi.GetCurrentInfoAsync(id, (Roles)role);
 
             if (schedule == null)
 			{
@@ -139,12 +134,19 @@ public class ShowScheduleCommand : BaseCommand
 		if (lesson == null)
 			return;
 
-		string sportLessonName = "Элективные дисциплины по физической культуре и спорту";
+		string[] sportLessonNames = { "Элективные дисциплины по физической культуре и спорту", "Физическая культура и спорт" };
+		string defaultLessonType = "лк";
+		string lessonType = defaultLessonType;
 
-        string lessonType = lesson.Description.Substring(0, lesson.Description.IndexOf(','));
-		string emoji = "📝";
+        if (lesson.Description.Contains(','))
+		{
+			var lessonDescriptionSplit = lesson.Description.Split(',');
+			lessonType = lessonDescriptionSplit[0];
+        }
 
         //🔬📝📌🛠🤸‍♀️
+		string emoji = "📝";
+
         switch (lessonType)
 		{
 			case "лк":
@@ -158,8 +160,9 @@ public class ShowScheduleCommand : BaseCommand
 				break;
 		}
 
-		if (lesson.Description.Contains(sportLessonName))
-            emoji = "🤸‍♀️";
+		foreach(var lessonName in sportLessonNames)
+            if (lesson.Description.Contains(lessonName))
+                emoji = "🤸‍♀️";
 
         var firstLessonStartTime = new TimeOnly(8, 30);
 		int lessonDuration = 90;

@@ -6,22 +6,15 @@ public static class WeekHelper
 {
     public static WeekTypes GetWeekType(string weekName)
     {
-        switch (weekName)
+        return weekName switch
         {
-            case "Понедельник":
-                return WeekTypes.Monday;
-            case "Вторник":
-                return WeekTypes.Tuesday;
-            case "Среда":
-                return WeekTypes.Wednesday;
-            case "Четверг":
-                return WeekTypes.Thursday;
-            case "Пятница":
-                return WeekTypes.Friday;
-            case "Суббота":
-                return WeekTypes.Saturday;
-        }
-
-        return WeekTypes.Undefined;
+            "Понедельник" => WeekTypes.Monday,
+            "Вторник" => WeekTypes.Tuesday,
+            "Среда" => WeekTypes.Wednesday,
+            "Четверг" => WeekTypes.Thursday,
+            "Пятница" => WeekTypes.Friday,
+            "Суббота" => WeekTypes.Saturday,
+            _ => WeekTypes.Undefined,
+        };
     }
 }

@@ -6,5 +6,4 @@ public class CurrentInfo
     public string Name { get; set; } = string.Empty;
     public int CurrentSemester { get; set; }
     public int CurrentWeekType { get; set; }
-
 }

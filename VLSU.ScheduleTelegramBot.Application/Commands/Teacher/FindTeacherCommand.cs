@@ -5,9 +5,8 @@ using Microsoft.Extensions.DependencyInjection;
 using VLSU.ScheduleTelegramBot.Domain.Interfaces.Services;
 using VLSU.ScheduleTelegramBot.Domain.Dto;
 using Microsoft.Extensions.Logging;
-using Telegram.Bot.Types.ReplyMarkups;
 
-namespace VLSU.ScheduleTelegramBot.Application.Commands;
+namespace VLSU.ScheduleTelegramBot.Application.Commands.Teacher;
 
 public class FindTeacherCommand : BaseCommand
 {
@@ -35,10 +34,10 @@ public class FindTeacherCommand : BaseCommand
             var userService = scope.ServiceProvider.GetRequiredService<IAppUserService>();
 
             var user = await userService.GetOrCreateAsync(message.Chat.Id);
-            await userService.UpdateAsync(new UpdateAppUser() 
-            { 
+            await userService.UpdateAsync(new UpdateAppUser()
+            {
                 ChatId = message.Chat.Id,
-                LooksAtTeachers = true 
+                LooksAtTeachers = true
             });
 
             var responceMessage = $"""

@@ -6,8 +6,9 @@ using Telegram.Bot.Types;
 using Telegram.Bot;
 using VLSU.ScheduleTelegramBot.Domain.Interfaces.Services;
 using VLSU.ScheduleTelegramBot.Domain.Enums;
+using VLSU.ScheduleTelegramBot.Application.Commands.Group;
 
-namespace VLSU.ScheduleTelegramBot.Application.Commands;
+namespace VLSU.ScheduleTelegramBot.Application.Commands.Teacher;
 
 public class ShowTeachersCommand : BaseCommand
 {
@@ -66,10 +67,10 @@ public class ShowTeachersCommand : BaseCommand
 
             for (int i = 0; i < teachers.Count; i++)
             {
-                var teacherId = teachers[i].Nrec;
+                var teacherId = teachers[i].Id;
                 var buttonArgs = $"{teacherId} {Roles.Teacher}";
 
-                inlineMarkup.AddNewRow().AddButton(teachers[i].FIO, $"{CommandNames.ShowWeeks} {buttonArgs}");
+                inlineMarkup.AddNewRow().AddButton(teachers[i].Fullname, $"{CommandNames.ShowWeeks} {buttonArgs}");
             }
 
             var responceMessage = "Выбери преподавателя: ";

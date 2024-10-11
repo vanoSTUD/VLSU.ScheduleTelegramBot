@@ -6,6 +6,7 @@ using Telegram.Bot;
 using VLSU.ScheduleTelegramBot.Domain.Interfaces.Services;
 using VLSU.ScheduleTelegramBot.Domain.Enums;
 using VLSU.ScheduleTelegramBot.Domain.Contracts;
+using VLSU.ScheduleTelegramBot.Application.Commands.Group;
 
 namespace VLSU.ScheduleTelegramBot.Application.Commands;
 
@@ -47,10 +48,9 @@ public class ShowWeeksCommand : BaseCommand
 			var vlsuApi = scope.ServiceProvider.GetRequiredService<IVlsuApiService>();
 			CurrentInfo? currentInfo;
 
-            if ((Roles)role == Roles.Group)
-                currentInfo = await vlsuApi.GetGroupInfoAsync(id);
-			else
-                currentInfo = await vlsuApi.GetTeacherInfoAsync(id);
+
+            currentInfo = await vlsuApi.GetCurrentInfoAsync(id, (Roles)role);
+
 
             if (currentInfo == null)
 			{
