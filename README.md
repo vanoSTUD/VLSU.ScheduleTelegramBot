@@ -2,8 +2,17 @@
 
 ## About 
 
-This Telegram bot works with the VLSU API and provides information to students about class schedules.
+This Telegram bot works with the VLSU API and provides information about the class schedules of groups and teachers.
 This project works with the [Telegram.Bot](https://github.com/TelegramBots/Telegram.Bot) library
+
+## Preview
+### Finding a schedule for a group
+
+https://github.com/user-attachments/assets/c10c02a3-fc21-43fc-a357-b5622ef34f69
+
+### Finding a schedule for a teacher
+
+https://github.com/user-attachments/assets/dcf0edc5-0fc0-4389-b4aa-e37b79fc1d6b
 
 ## Setup
 
@@ -23,7 +32,7 @@ You can also replace the `SecretToken` with your any string.
 "BotConfiguration": {
   "BotToken": "<Your bot token from BotFather>",
   "BotWebhookUrl": "<Https Url from Ngrok or Clo>",
-  "SecretToken": "<Any string>"
+  "SecretToken": "<Any-string>"
 }
 ```
 
