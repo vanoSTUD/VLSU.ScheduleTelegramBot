@@ -28,8 +28,10 @@ public class VlsuApiService : IVlsuApiService
         _scheduleMapper = scheduleMapper;
     }
 
-    public async Task<List<Group>?> GetGroupsAsync(long instituteId, int educationForm)
+    public async Task<List<Group>?> GetGroupsAsync(long instituteId, int educationForm, CancellationToken ct = default)
     {
+        ct.ThrowIfCancellationRequested();
+
         try
         {
             using HttpClient client = new();
@@ -42,16 +44,18 @@ public class VlsuApiService : IVlsuApiService
 
             return _mapper.Map<List<Group>>(responceGroups);
         }
-        catch (Exception ex)
+        catch 
         {
-            _logger.LogError(ex, "Error from VlguApiService.GetGroups(): {Message}", ex.Message);
-
             return null;
+
+            throw;
         }
     }
 
-    public async Task<List<Institute>?> GetInstitutesAsync()
+    public async Task<List<Institute>?> GetInstitutesAsync(CancellationToken ct = default)
     {
+        ct.ThrowIfCancellationRequested();
+
         try
         {
             using HttpClient client = new();
@@ -63,16 +67,18 @@ public class VlsuApiService : IVlsuApiService
 
             return _mapper.Map<List<Institute>>(responceInstitutes);
         }
-        catch (Exception ex)
+        catch
         {
-            _logger.LogError(ex, "Error from VlguApiService.GetInstitutes(): {Message}", ex.Message);
-
             return null;
+
+            throw;
         }
     }
 
-    public async Task<List<Teacher>?> GetTeachersAsync(string FIO)
+    public async Task<List<Teacher>?> GetTeachersAsync(string FIO, CancellationToken ct = default)
     {
+        ct.ThrowIfCancellationRequested();
+
         try
         {
             using HttpClient client = new();
@@ -85,16 +91,18 @@ public class VlsuApiService : IVlsuApiService
 
             return _mapper.Map<List<Teacher>>(responceTeachers);
         }
-        catch (Exception ex)
+        catch
         {
-            _logger.LogError(ex, "Exception in {Class}.{Method}, Message: {Message}", nameof(VlsuApiService), nameof(GetTeachersAsync), ex.Message);
-
             return null;
+
+            throw;
         }
     }
 
-    public async Task<CurrentInfo?> GetCurrentInfoAsync(long id, Roles role)
+    public async Task<CurrentInfo?> GetCurrentInfoAsync(long id, Roles role, CancellationToken ct = default)
     {
+        ct.ThrowIfCancellationRequested();
+
         return role switch
         {
             Roles.Group => await GetCurrentInfoAsync(id, _options.Value.GetGroupInfo),
@@ -103,8 +111,10 @@ public class VlsuApiService : IVlsuApiService
         };
     }
 
-    public async Task<ScheduleForWeek?> GetScheduleAsync(long id, Roles role, int weekType = 0, string weekDays = "1,2,3,4,5,6")
+    public async Task<ScheduleForWeek?> GetScheduleAsync(long id, Roles role, int weekType = 0, string weekDays = "1,2,3,4,5,6", CancellationToken ct = default)
     {
+        ct.ThrowIfCancellationRequested();
+
         return role switch
         {
             Roles.Group => await GetScheduleAsync(id, _options.Value.GetGroupSchedule, weekType, weekDays),
@@ -113,8 +123,10 @@ public class VlsuApiService : IVlsuApiService
         };
     }
 
-    private async Task<CurrentInfo?> GetCurrentInfoAsync(long id, Uri sourceUri)
+    private async Task<CurrentInfo?> GetCurrentInfoAsync(long id, Uri sourceUri, CancellationToken ct = default)
     {
+        ct.ThrowIfCancellationRequested();
+
         try
         {
             using HttpClient client = new();
@@ -126,16 +138,18 @@ public class VlsuApiService : IVlsuApiService
 
             return currentInfo;
         }
-        catch (Exception ex)
+        catch 
         {
-            _logger.LogError(ex, "Error from VlguApiService.GetTeacherInfoAsync(): {Message}", ex.Message);
-
             return null;
+
+            throw;
         }
     }
 
-    private async Task<ScheduleForWeek?> GetScheduleAsync(long id, Uri sourceUri, int weekType = 0, string weekDays = "1,2,3,4,5,6")
+    private async Task<ScheduleForWeek?> GetScheduleAsync(long id, Uri sourceUri, int weekType = 0, string weekDays = "1,2,3,4,5,6", CancellationToken ct = default)
     {
+        ct.ThrowIfCancellationRequested();
+
         try
         {
             using HttpClient client = new();
@@ -156,11 +170,11 @@ public class VlsuApiService : IVlsuApiService
 
             return scheduleForWeek;
         }
-        catch (Exception ex)
+        catch
         {
-            _logger.LogError(ex, "Error from VlguApiService.GetTeacherScheduleAsync(): {Message}", ex.Message);
-
             return null;
+
+            throw;
         }
     }
 }

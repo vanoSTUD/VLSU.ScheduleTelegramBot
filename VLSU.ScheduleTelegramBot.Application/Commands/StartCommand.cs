@@ -16,8 +16,10 @@ public class StartCommand : BaseCommand
 
 	public override string Name => CommandNames.Start;
 
-	public override async Task ExecuteAsync(Update update, string[]? args = default)
+	public override async Task ExecuteAsync(Update update, CancellationToken cancellationToken = default, string[]? args = default)
 	{
+		cancellationToken.ThrowIfCancellationRequested();
+
 		Message? message = null;
 
 		if (update?.Message != null)
@@ -36,6 +38,6 @@ public class StartCommand : BaseCommand
 			.AddNewRow().AddButton("Студента", $"{CommandNames.FormEducation}")
 			.AddNewRow().AddButton("Преподавателя", $"{CommandNames.FindTeacher}");
 
-		await _bot.SendTextMessageAsync(message.Chat, responceMessage, replyMarkup: inlineMarkup, parseMode: ParseMode.Html);
+		await _bot.SendTextMessageAsync(message.Chat, responceMessage, replyMarkup: inlineMarkup, parseMode: ParseMode.Html, cancellationToken: cancellationToken);
 	}
 }

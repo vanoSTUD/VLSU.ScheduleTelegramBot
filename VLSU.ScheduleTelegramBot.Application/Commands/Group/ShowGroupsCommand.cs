@@ -24,8 +24,10 @@ public class ShowGroupsCommand : BaseCommand
 
     public override string Name => CommandNames.ShowGroups;
 
-    public override async Task ExecuteAsync(Update update, string[]? args = default)
+    public override async Task ExecuteAsync(Update update, CancellationToken cancellationToken, string[]? args = default)
     {
+        cancellationToken.ThrowIfCancellationRequested();
+
         if (update.CallbackQuery is not { } callback)
             return;
 
@@ -39,19 +41,19 @@ public class ShowGroupsCommand : BaseCommand
                 args?[2] is not { } course)
             {
                 _logger.LogWarning("Agguments are null: {args}", args?.ToString());
-                await _bot.SendTextMessageAsync(message.Chat, "<b>Не удалось отобразить группы. Попробуйте позже</b>", parseMode: ParseMode.Html);
+                await _bot.SendTextMessageAsync(message.Chat, "<b>Не удалось отобразить группы. Попробуйте позже</b>", parseMode: ParseMode.Html, cancellationToken: cancellationToken);
 
                 return;
             }
 
             using var scope = _scopeFactory.CreateScope();
             var vlsuApi = scope.ServiceProvider.GetRequiredService<IVlsuApiService>();
-            var foundedGroups = await vlsuApi.GetGroupsAsync(instituteId, educationForm);
+            var foundedGroups = await vlsuApi.GetGroupsAsync(instituteId, educationForm, cancellationToken);
 
             if (foundedGroups == null)
             {
                 _logger.LogWarning("Groups are null: {args}", args?.ToString());
-                await _bot.SendTextMessageAsync(message.Chat, "<b>Не удалось отобразить группы. Попробуйте позже</b>", parseMode: ParseMode.Html);
+                await _bot.SendTextMessageAsync(message.Chat, "<b>Не удалось отобразить группы. Попробуйте позже</b>", parseMode: ParseMode.Html, cancellationToken: cancellationToken);
                 return;
             }
 
@@ -59,7 +61,7 @@ public class ShowGroupsCommand : BaseCommand
 
             if (groups.Count == 0)
             {
-                await _bot.SendTextMessageAsync(message.Chat, "<b>Группы отсутствуют в данной выборке</b>", parseMode: ParseMode.Html);
+                await _bot.SendTextMessageAsync(message.Chat, "<b>Группы отсутствуют в данной выборке</b>", parseMode: ParseMode.Html, cancellationToken: cancellationToken);
                 return;
             }
 
@@ -79,14 +81,14 @@ public class ShowGroupsCommand : BaseCommand
 
             var responceMessage = "Выбери желаемую группу: ";
 
-            await _bot.SendTextMessageAsync(message.Chat, responceMessage, replyMarkup: inlineMarkup, parseMode: ParseMode.Html);
+            await _bot.SendTextMessageAsync(message.Chat, responceMessage, replyMarkup: inlineMarkup, parseMode: ParseMode.Html, cancellationToken: cancellationToken);
 
         }
-        catch (Exception ex)
+        catch
         {
-            _logger.LogError(ex, "Exception on ShowGroupsCommand.ExecuteAsync()");
+            await _bot.SendTextMessageAsync(message.Chat, "<b>Не удалось отобразить группы. Попробуйте позже</b>", parseMode: ParseMode.Html, cancellationToken: cancellationToken);
 
-            await _bot.SendTextMessageAsync(message.Chat, "<b>Не удалось отобразить группы. Попробуйте позже</b>", parseMode: ParseMode.Html);
+            throw;
         }
     }
 }

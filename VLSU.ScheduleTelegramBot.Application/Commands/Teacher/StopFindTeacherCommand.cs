@@ -23,8 +23,10 @@ public class StopFindTeacherCommand : BaseCommand
 
     public override string Name => CommandNames.StopFindTeachers;
 
-    public override async Task ExecuteAsync(Update update, string[]? args = default)
+    public override async Task ExecuteAsync(Update update, CancellationToken cancellationToken, string[]? args = default)
     {
+        cancellationToken.ThrowIfCancellationRequested();
+
         if (update.CallbackQuery is { } callback)
         {
             if (callback.Message is not { } message)
@@ -35,20 +37,18 @@ public class StopFindTeacherCommand : BaseCommand
                 using var scope = _scopeFactory.CreateScope();
                 var userService = scope.ServiceProvider.GetRequiredService<IAppUserService>();
 
-                var user = await userService.GetOrCreateAsync(message.Chat.Id);
+                var user = await userService.GetOrCreateAsync(message.Chat.Id, cancellationToken);
                 await userService.UpdateAsync(new UpdateAppUser()
                 {
                     ChatId = message.Chat.Id,
                     LooksAtTeachers = false
                 });
 
-                await _bot.SendTextMessageAsync(message.Chat, "Поиск преподавателя остановлен");
+                await _bot.SendTextMessageAsync(message.Chat, "Поиск преподавателя остановлен", cancellationToken: cancellationToken);
             }
-            catch (Exception ex)
+            catch
             {
-                _logger.LogError(ex, "Exception in {Class}.{Method}, Message: {Message}", nameof(StopFindTeacherCommand), nameof(ExecuteAsync), ex.Message);
-
-                return;
+                throw;
             }
         }
 

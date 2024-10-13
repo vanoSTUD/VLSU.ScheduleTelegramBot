@@ -10,6 +10,7 @@ using VLSU.ScheduleTelegramBot.Domain.Enums;
 using VLSU.ScheduleTelegramBot.Domain.Contracts;
 using VLSU.ScheduleTelegramBot.Domain.Entities;
 using VLSU.ScheduleTelegramBot.Application.Commands.Group;
+using System.Threading;
 
 namespace VLSU.ScheduleTelegramBot.Application.Commands;
 
@@ -28,8 +29,10 @@ public class ShowScheduleCommand : BaseCommand
 
 	public override string Name => CommandNames.ShowSchedule;
 
-	public override async Task ExecuteAsync(Update update, string[]? args = default)
+	public override async Task ExecuteAsync(Update update, CancellationToken cancellationToken, string[]? args = default)
 	{
+		cancellationToken.ThrowIfCancellationRequested();
+
 		if (update.CallbackQuery is not { } callback)
 			return;
 
@@ -46,7 +49,7 @@ public class ShowScheduleCommand : BaseCommand
 				string.IsNullOrEmpty(args[3]))
 			{
 				_logger.LogWarning("Agguments are null: {args}", args?.ToString());
-				await _bot.SendTextMessageAsync(message.Chat, "<b>Не удалось отобразить расписание. Попробуйте позже</b>", parseMode: ParseMode.Html);
+				await _bot.SendTextMessageAsync(message.Chat, "<b>Не удалось отобразить расписание. Попробуйте позже</b>", parseMode: ParseMode.Html, cancellationToken: cancellationToken);
 
 				return;
 			}
@@ -54,14 +57,14 @@ public class ShowScheduleCommand : BaseCommand
 			using var scope = _scopeFactory.CreateScope();
 			var vlsuApi = scope.ServiceProvider.GetRequiredService<IVlsuApiService>();
 
-			var schedule = await vlsuApi.GetScheduleAsync(id, (Roles)role);
-			var currentInfo = await vlsuApi.GetCurrentInfoAsync(id, (Roles)role);
+			var schedule = await vlsuApi.GetScheduleAsync(id, (Roles)role, ct: cancellationToken);
+			var currentInfo = await vlsuApi.GetCurrentInfoAsync(id, (Roles)role, cancellationToken);
 			var name = string.Join(' ', args.Skip(3));
 
             if (schedule == null)
 			{
 				_logger.LogWarning("Vlsu Api returns null: Id = {id}, Role = {role}", id, role);
-				await _bot.SendTextMessageAsync(message.Chat, $"<b>Расписание на эту неделю не найдено</b>", parseMode: ParseMode.Html);
+				await _bot.SendTextMessageAsync(message.Chat, $"<b>Расписание на эту неделю не найдено</b>", parseMode: ParseMode.Html, cancellationToken: cancellationToken);
 
 				return;
 			}
@@ -69,25 +72,25 @@ public class ShowScheduleCommand : BaseCommand
 			if (currentInfo == null)
 			{
                 _logger.LogError("Vlsu Api returns null: Id = {id}", id);
-                await _bot.SendTextMessageAsync(message.Chat, $"<b>Ошибка в получении расписания :( \nПопробуйте позже</b>", parseMode: ParseMode.Html);
+                await _bot.SendTextMessageAsync(message.Chat, $"<b>Ошибка в получении расписания :( \nПопробуйте позже</b>", parseMode: ParseMode.Html, cancellationToken: cancellationToken);
 
                 return;
             }
 
 			var scheduleMessage = GetScheduleMessage((EducationWeekTypes)educationWeekType, currentInfo, schedule, name);
 
-			await SendMessageWithButtonsAsync(_bot, message.Chat.Id, scheduleMessage, id, (Roles)role, (EducationWeekTypes)currentInfo!.CurrentWeekType, name);
+			await SendMessageWithButtonsAsync(_bot, message.Chat.Id, scheduleMessage, id, (Roles)role, (EducationWeekTypes)currentInfo!.CurrentWeekType, name, cancellationToken);
 
 		}
-		catch (Exception ex)
+		catch 
 		{
-			_logger.LogError(ex, "Exception on ShowScheduleCommand.ExecuteAsync()");
+			await _bot.SendTextMessageAsync(message.Chat, "<b>Не удалось отобразить расписание. Попробуйте позже</b>", parseMode: ParseMode.Html, cancellationToken: cancellationToken);
 
-			await _bot.SendTextMessageAsync(message.Chat, "<b>Не удалось отобразить расписание. Попробуйте позже</b>", parseMode: ParseMode.Html);
+			throw;
 		}
 	}
 
-    public static async Task SendMessageWithButtonsAsync(ITelegramBotClient bot, ChatId chatId, string message, long id, Roles role, EducationWeekTypes currentEducationWeekType, string name)
+    public static async Task SendMessageWithButtonsAsync(ITelegramBotClient bot, ChatId chatId, string message, long id, Roles role, EducationWeekTypes currentEducationWeekType, string name, CancellationToken  ct = default)
 	{
 		var nextEducationWeekType = currentEducationWeekType == EducationWeekTypes.Denominator ? EducationWeekTypes.Nominator : EducationWeekTypes.Denominator;
 		var inlineMarkup = new InlineKeyboardMarkup();
@@ -95,7 +98,7 @@ public class ShowScheduleCommand : BaseCommand
 			.AddNewRow().AddButton($"Текущая неделя", $"{CommandNames.ShowSchedule} {id} {(int)currentEducationWeekType} {(int)role} {name}")
 			.AddNewRow().AddButton($"Следующая неделя", $"{CommandNames.ShowSchedule} {id} {(int)nextEducationWeekType} {(int)role} {name}");
 
-		await bot.SendTextMessageAsync(chatId, message, replyMarkup: inlineMarkup, parseMode: ParseMode.Html);
+		await bot.SendTextMessageAsync(chatId, message, replyMarkup: inlineMarkup, parseMode: ParseMode.Html, cancellationToken: ct);
 	}
 
     private static string GetScheduleMessage(EducationWeekTypes educationWeekType, CurrentInfo currentInfo, ScheduleForWeek schedule, string name)

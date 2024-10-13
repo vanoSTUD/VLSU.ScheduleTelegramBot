@@ -6,13 +6,13 @@ namespace VLSU.ScheduleTelegramBot.Domain.Interfaces.Services;
 
 public interface IVlsuApiService
 {
-    public Task<CurrentInfo?> GetCurrentInfoAsync(long groupId, Roles role);
+    public Task<CurrentInfo?> GetCurrentInfoAsync(long groupId, Roles role, CancellationToken ct = default);
 
-    public Task<List<Group>?> GetGroupsAsync(long instituteId, int educationForm);
+    public Task<List<Group>?> GetGroupsAsync(long instituteId, int educationForm, CancellationToken ct = default);
 
-    public Task<List<Institute>?> GetInstitutesAsync();
+    public Task<List<Institute>?> GetInstitutesAsync(CancellationToken ct = default);
 
-    public Task<ScheduleForWeek?> GetScheduleAsync(long id, Roles role, int weekType = 0, string weekDays = "1,2,3,4,5,6");
+    public Task<ScheduleForWeek?> GetScheduleAsync(long id, Roles role, int weekType = 0, string weekDays = "1,2,3,4,5,6", CancellationToken ct = default);
 
-    public Task<List<Teacher>?> GetTeachersAsync(string FIO);
+    public Task<List<Teacher>?> GetTeachersAsync(string FIO, CancellationToken ct = default);
 }

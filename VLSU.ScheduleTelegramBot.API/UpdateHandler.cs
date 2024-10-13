@@ -26,7 +26,13 @@ public class UpdateHandler : IUpdateHandler
 
     public async Task HandleErrorAsync(ITelegramBotClient botClient, Exception exception, HandleErrorSource source, CancellationToken cancellationToken)
 	{
-		_logger.LogInformation("HandleError: {Exception}", exception);
+		if (exception is OperationCanceledException or TaskCanceledException)
+		{
+			_logger.LogWarning("Handle {name}: {Message}", nameof(exception), exception.Message);
+			return;
+		}
+
+		_logger.LogError("HandleError: {Exception}", exception);
 
 		if (exception is RequestException)
 			await Task.Delay(TimeSpan.FromSeconds(2), cancellationToken);
@@ -36,13 +42,12 @@ public class UpdateHandler : IUpdateHandler
 	{
 		cancellationToken.ThrowIfCancellationRequested();
 
-		await HandleMessage(update);
+		await HandleMessage(update, cancellationToken);
 
-		await HandleCallbackQuery(update);
-
+		await HandleCallbackQuery(update, cancellationToken);
 	}
 
-	private async Task HandleMessage(Update update)
+	private async Task HandleMessage(Update update, CancellationToken cancellationToken)
 	{
 		if (update.Message is not { } message)
 			return;
@@ -58,20 +63,20 @@ public class UpdateHandler : IUpdateHandler
 		{
 			string commandName = messageText.Split(' ')[0];
 
-			await ExecuteCommand(commandName, update);
+			await ExecuteCommandAsync(commandName, update, cancellationToken);
 		}
         else if (user.LooksAtTeachers)
         {
-            await _commands.First(command => command.Name == CommandNames.ShowTeachersCount).ExecuteAsync(update);
+            await _commands.First(command => command.Name == CommandNames.ShowTeachersCount).ExecuteAsync(update, cancellationToken);
             return;
         }
         else
 		{
-			await _commands.First(command => command.Name == CommandNames.Undefind).ExecuteAsync(update);
+			await _commands.First(command => command.Name == CommandNames.Undefind).ExecuteAsync(update, cancellationToken);
 		}
 	}
 
-	private async Task HandleCallbackQuery(Update update)
+	private async Task HandleCallbackQuery(Update update, CancellationToken cancellationToken)
 	{
 		if (update.CallbackQuery is not { } callback)
 			return;
@@ -79,23 +84,23 @@ public class UpdateHandler : IUpdateHandler
 		if (callback.Data is not { } data)
 			return;
 
-        await ExecuteCommand(data, update);
+        await ExecuteCommandAsync(data, update, cancellationToken);
 
-        await _bot.AnswerCallbackQueryAsync(callback.Id);
+        await _bot.AnswerCallbackQueryAsync(callback.Id, cancellationToken: cancellationToken);
 	}
 
-	private async Task ExecuteCommand(string command, Update update)
+	private async Task ExecuteCommandAsync(string command, Update update, CancellationToken cancellationToken)
 	{
 		var foundedCommand = _commands.FirstOrDefault(c => c.Name == command.Split(' ')[0]);
 
 		if (foundedCommand == null)
 		{
-            await _commands.First(command => command.Name == CommandNames.Undefind).ExecuteAsync(update);
+            await _commands.First(command => command.Name == CommandNames.Undefind).ExecuteAsync(update, cancellationToken);
 			return;
 		}
 
         var args = command.Split(' ').Skip(1).ToArray();
 
-		await foundedCommand.ExecuteAsync(update, args);
+		await foundedCommand.ExecuteAsync(update, cancellationToken, args);
 	}
 }

@@ -23,8 +23,10 @@ public class ShowTeachersCountCommand : BaseCommand
 
     public override string Name => CommandNames.ShowTeachersCount;
 
-    public override async Task ExecuteAsync(Update update, string[]? args = default)
+    public override async Task ExecuteAsync(Update update, CancellationToken cancellationToken, string[]? args = default)
     {
+        cancellationToken.ThrowIfCancellationRequested();
+
         if (update.Message is not { } message)
             return;
 
@@ -40,7 +42,7 @@ public class ShowTeachersCountCommand : BaseCommand
             var userService = scope.ServiceProvider.GetRequiredService<IAppUserService>();
             var vlsuApi = scope.ServiceProvider.GetRequiredService<IVlsuApiService>();
 
-            var user = await userService.GetOrCreateAsync(message.Chat.Id);
+            var user = await userService.GetOrCreateAsync(message.Chat.Id, cancellationToken);
 
             if (user.LooksAtTeachers == false)
             {
@@ -50,21 +52,21 @@ public class ShowTeachersCountCommand : BaseCommand
 
             if (userText.Length < 3)
             {
-                await _bot.SendTextMessageAsync(message.Chat, "Для поиска нужно минимум 3 буквы от ФИО преподавателя.", replyMarkup: stopMarkup);
+                await _bot.SendTextMessageAsync(message.Chat, "Для поиска нужно минимум 3 буквы от ФИО преподавателя.", replyMarkup: stopMarkup, cancellationToken: cancellationToken);
                 return;
             }
 
-            var teachers = await vlsuApi.GetTeachersAsync(userText);
+            var teachers = await vlsuApi.GetTeachersAsync(userText, cancellationToken);
 
             if (teachers == null)
             {
-                await _bot.SendTextMessageAsync(message.Chat, "Не удалось получить данные :( \nПопробуйте позже", replyMarkup: stopMarkup);
+                await _bot.SendTextMessageAsync(message.Chat, "Не удалось получить данные :( \nПопробуйте позже", replyMarkup: stopMarkup, cancellationToken: cancellationToken);
                 return;
             }
 
             if (teachers.Count == 0)
             {
-                await _bot.SendTextMessageAsync(message.Chat, $"Препрдаватели с совпадением '{userText}' не найдены", replyMarkup: stopMarkup);
+                await _bot.SendTextMessageAsync(message.Chat, $"Препрдаватели с совпадением '{userText}' не найдены", replyMarkup: stopMarkup, cancellationToken: cancellationToken);
                 return;
             }
 
@@ -80,13 +82,13 @@ public class ShowTeachersCountCommand : BaseCommand
                 .AddNewRow().AddButton($"Открыть", $"{CommandNames.ShowTeachers} {buttonArgs}")
                 .AddNewRow().AddButton(stopButton);
 
-            await _bot.SendTextMessageAsync(message.Chat, responceMessage, replyMarkup: inlineMarkup, parseMode: ParseMode.Html);
+            await _bot.SendTextMessageAsync(message.Chat, responceMessage, replyMarkup: inlineMarkup, parseMode: ParseMode.Html, cancellationToken: cancellationToken);
         }
-        catch (Exception ex)
+        catch
         {
-            _logger.LogError(ex, "Exception in {Class}.{Method}, Message: {Message}", nameof(ShowTeachersCountCommand), nameof(ExecuteAsync), ex.Message);
+            await _bot.SendTextMessageAsync(message.Chat, "Не удалось получить данные от сервера :( \nПопробуйте позже", replyMarkup: stopMarkup, cancellationToken: cancellationToken);
 
-            await _bot.SendTextMessageAsync(message.Chat, "Не удалось получить данные от сервера :( \nПопробуйте позже", replyMarkup: stopMarkup);
+            throw;
         }
     }
 }

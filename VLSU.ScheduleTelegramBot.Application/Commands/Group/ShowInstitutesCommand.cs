@@ -24,8 +24,10 @@ public class ShowInstitutesCommand : BaseCommand
 
     public override string Name => CommandNames.ShowInstitutes;
 
-    public override async Task ExecuteAsync(Update update, string[]? args = default)
+    public override async Task ExecuteAsync(Update update, CancellationToken cancellationToken, string[]? args = default)
     {
+        cancellationToken.ThrowIfCancellationRequested();
+
         if (update.CallbackQuery is not { } callback)
             return;
 
@@ -46,11 +48,11 @@ public class ShowInstitutesCommand : BaseCommand
             using var scope = _scopeFactory.CreateScope();
             var vlsuApi = scope.ServiceProvider.GetRequiredService<IVlsuApiService>();
 
-            var institutes = await vlsuApi.GetInstitutesAsync();
+            var institutes = await vlsuApi.GetInstitutesAsync(cancellationToken);
 
             if (institutes == null)
             {
-                await _bot.SendTextMessageAsync(message.Chat, "<b>Не удалось отобразить институты. Попробуйте позже</b>", parseMode: ParseMode.Html);
+                await _bot.SendTextMessageAsync(message.Chat, "<b>Не удалось отобразить институты. Попробуйте позже</b>", parseMode: ParseMode.Html, cancellationToken: cancellationToken);
                 _logger.LogWarning("Institutes are null. Args = {args}", args?.ToString());
 
                 return;
@@ -58,7 +60,7 @@ public class ShowInstitutesCommand : BaseCommand
 
             if (institutes.Count == 0)
             {
-                await _bot.SendTextMessageAsync(message.Chat, "<b>Не удалось отобразить институты. Попробуйте позже</b>", parseMode: ParseMode.Html);
+                await _bot.SendTextMessageAsync(message.Chat, "<b>Не удалось отобразить институты. Попробуйте позже</b>", parseMode: ParseMode.Html, cancellationToken: cancellationToken);
                 _logger.LogDebug("Vlsu api returns count = 0. Args = {args}", args?.ToString());
 
                 return;
@@ -79,13 +81,13 @@ public class ShowInstitutesCommand : BaseCommand
 
             var responceMessage = "Выбери желаемый институт: ";
 
-            await _bot.SendTextMessageAsync(message.Chat, responceMessage, replyMarkup: inlineMarkup, parseMode: ParseMode.Html);
+            await _bot.SendTextMessageAsync(message.Chat, responceMessage, replyMarkup: inlineMarkup, parseMode: ParseMode.Html, cancellationToken: cancellationToken);
         }
-        catch (Exception ex)
+        catch
         {
-            _logger.LogError(ex, "Exception on ShowInstitutesCommand.ExecuteAsync()");
+            await _bot.SendTextMessageAsync(message.Chat, "<b>Не удалось отобразить институты. Попробуйте позже</b>", parseMode: ParseMode.Html, cancellationToken: cancellationToken);
 
-            await _bot.SendTextMessageAsync(message.Chat, "<b>Не удалось отобразить институты. Попробуйте позже</b>", parseMode: ParseMode.Html);
+            throw;
         }
     }
 }

@@ -25,8 +25,10 @@ public class ShowTeachersCommand : BaseCommand
 
     public override string Name => CommandNames.ShowTeachers;
 
-    public override async Task ExecuteAsync(Update update, string[]? args = default)
+    public override async Task ExecuteAsync(Update update, CancellationToken cancellationToken, string[]? args = default)
     {
+        cancellationToken.ThrowIfCancellationRequested();
+
         if (update.CallbackQuery is not { } callback)
             return;
 
@@ -46,20 +48,20 @@ public class ShowTeachersCommand : BaseCommand
             var vlsuApi = scope.ServiceProvider.GetRequiredService<IVlsuApiService>();
             var userService = scope.ServiceProvider.GetRequiredService<IAppUserService>();
 
-            var user = await userService.GetOrCreateAsync(message.Chat.Id);
+            var user = await userService.GetOrCreateAsync(message.Chat.Id, cancellationToken);
 
             var userText = string.Join(" ", args);
-            var teachers = await vlsuApi.GetTeachersAsync(userText);
+            var teachers = await vlsuApi.GetTeachersAsync(userText, cancellationToken);
 
             if (teachers == null)
             {
-                await _bot.SendTextMessageAsync(message.Chat, "Не удалось получить данные :( \nПопробуйте позже", parseMode: ParseMode.Html);
+                await _bot.SendTextMessageAsync(message.Chat, "Не удалось получить данные :( \nПопробуйте позже", parseMode: ParseMode.Html, cancellationToken: cancellationToken);
                 return;
             }
 
             if (teachers.Count == 0)
             {
-                await _bot.SendTextMessageAsync(message.Chat, $"Препрдаватели с совпадением '{userText}' не найдены", parseMode: ParseMode.Html);
+                await _bot.SendTextMessageAsync(message.Chat, $"Препрдаватели с совпадением '{userText}' не найдены", parseMode: ParseMode.Html, cancellationToken: cancellationToken);
                 return;
             }
 
@@ -76,14 +78,14 @@ public class ShowTeachersCommand : BaseCommand
 
             var responceMessage = "Выбери преподавателя: ";
 
-            await _bot.SendTextMessageAsync(message.Chat, responceMessage, replyMarkup: inlineMarkup, parseMode: ParseMode.Html);
+            await _bot.SendTextMessageAsync(message.Chat, responceMessage, replyMarkup: inlineMarkup, parseMode: ParseMode.Html, cancellationToken: cancellationToken);
 
         }
-        catch (Exception ex)
+        catch
         {
-            _logger.LogError(ex, "Exception in {class}.{method}. Message: {message}", nameof(ShowTeachersCommand), nameof(ExecuteAsync), ex.Message);
+            await _bot.SendTextMessageAsync(message.Chat, "<b>Не удалось отобразить преподавателей :( \nПопробуйте позже</b>", parseMode: ParseMode.Html, cancellationToken: cancellationToken);
 
-            await _bot.SendTextMessageAsync(message.Chat, "<b>Не удалось отобразить преподавателей :( \nПопробуйте позже</b>", parseMode: ParseMode.Html);
+            throw;
         }
     }
 }

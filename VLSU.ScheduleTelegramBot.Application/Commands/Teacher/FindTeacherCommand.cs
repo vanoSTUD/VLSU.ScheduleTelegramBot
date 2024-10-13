@@ -23,8 +23,10 @@ public class FindTeacherCommand : BaseCommand
 
     public override string Name => CommandNames.FindTeacher;
 
-    public override async Task ExecuteAsync(Update update, string[]? args = default)
+    public override async Task ExecuteAsync(Update update, CancellationToken cancellationToken, string[]? args = default)
     {
+        cancellationToken.ThrowIfCancellationRequested();
+
         if (update.CallbackQuery?.Message is not { } message)
             return;
 
@@ -33,25 +35,24 @@ public class FindTeacherCommand : BaseCommand
             using var scope = _scopeFactory.CreateScope();
             var userService = scope.ServiceProvider.GetRequiredService<IAppUserService>();
 
-            var user = await userService.GetOrCreateAsync(message.Chat.Id);
+            var user = await userService.GetOrCreateAsync(message.Chat.Id, cancellationToken);
             await userService.UpdateAsync(new UpdateAppUser()
             {
                 ChatId = message.Chat.Id,
                 LooksAtTeachers = true
-            });
+            }, cancellationToken);
 
             var responceMessage = $"""
             Напиши ФИО преподавателя или его часть (минимум 3 символа)
             """;
 
-            await _bot.SendTextMessageAsync(message.Chat, responceMessage, parseMode: ParseMode.Html);
+            await _bot.SendTextMessageAsync(message.Chat, responceMessage, parseMode: ParseMode.Html, cancellationToken: cancellationToken);
         }
-        catch (Exception ex)
+        catch 
         {
-            _logger.LogError(ex, "Exception in {Class}.{Method}, Message: {Message}", nameof(FindTeacherCommand), nameof(ExecuteAsync), ex.Message);
+            await _bot.SendTextMessageAsync(message.Chat, "Не удалось получить данные от сервера :( \nПопробуйте позже", parseMode: ParseMode.Html, cancellationToken: cancellationToken);
 
-            await _bot.SendTextMessageAsync(message.Chat, "Не удалось получить данные от сервера :( \nПопробуйте позже", parseMode: ParseMode.Html);
-
+            throw;
         }
     }
 }

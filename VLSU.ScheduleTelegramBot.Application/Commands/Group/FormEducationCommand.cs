@@ -17,8 +17,10 @@ public class FormEducationCommand : BaseCommand
 
     public override string Name => CommandNames.FormEducation;
 
-    public override async Task ExecuteAsync(Update update, string[]? args = default)
+    public override async Task ExecuteAsync(Update update, CancellationToken cancellationToken, string[]? args = default)
     {
+        cancellationToken.ThrowIfCancellationRequested();
+
         if (update.CallbackQuery is not { } callback)
             return;
 
@@ -32,6 +34,6 @@ public class FormEducationCommand : BaseCommand
             .AddNewRow().AddButton("Заочная", $"{CommandNames.ShowInstitutes} {(int)EducationForms.ParteTime}")
             .AddNewRow().AddButton("Очно-Заочная", $"{CommandNames.ShowInstitutes} {(int)EducationForms.Mixed}");
 
-        await _bot.SendTextMessageAsync(message.Chat, responceMessage, replyMarkup: inlineMarkup, parseMode: ParseMode.Html);
+        await _bot.SendTextMessageAsync(message.Chat, responceMessage, replyMarkup: inlineMarkup, parseMode: ParseMode.Html, cancellationToken: cancellationToken);
     }
 }

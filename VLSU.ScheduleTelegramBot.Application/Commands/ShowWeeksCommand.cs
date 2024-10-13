@@ -24,8 +24,10 @@ public class ShowWeeksCommand : BaseCommand
 
 	public override string Name => CommandNames.ShowWeeks;
 
-	public override async Task ExecuteAsync(Update update, string[]? args = default)
+	public override async Task ExecuteAsync(Update update, CancellationToken cancellationToken = default, string[]? args = default)
 	{
+		cancellationToken.ThrowIfCancellationRequested();
+
 		if (update.CallbackQuery is not { } callback)
 			return;
 
@@ -41,7 +43,7 @@ public class ShowWeeksCommand : BaseCommand
 				string.IsNullOrEmpty(args[2]))
 			{
 				_logger.LogWarning("Agguments are null: {args}", args?.ToString());
-				await _bot.SendTextMessageAsync(message.Chat, "<b>Не удалось отобразить учебные недели. Попробуйте позже</b>", parseMode: ParseMode.Html);
+				await _bot.SendTextMessageAsync(message.Chat, "<b>Не удалось отобразить учебные недели. Попробуйте позже</b>", parseMode: ParseMode.Html, cancellationToken: cancellationToken);
 
 				return;
 			}
@@ -49,13 +51,13 @@ public class ShowWeeksCommand : BaseCommand
 			using var scope = _scopeFactory.CreateScope();
 			var vlsuApi = scope.ServiceProvider.GetRequiredService<IVlsuApiService>();
 
-            var currentInfo = await vlsuApi.GetCurrentInfoAsync(id, (Roles)role);
+            var currentInfo = await vlsuApi.GetCurrentInfoAsync(id, (Roles)role, cancellationToken);
 			var name = string.Join(' ',args.Skip(2));
 
             if (currentInfo == null)
 			{
 				_logger.LogWarning("Vlsu Api returns null: {args}", args?.ToString());
-				await _bot.SendTextMessageAsync(message.Chat, "<b>Не удалось отобразить учебные недели. Попробуйте позже</b>", parseMode: ParseMode.Html);
+				await _bot.SendTextMessageAsync(message.Chat, "<b>Не удалось отобразить учебные недели. Попробуйте позже</b>", parseMode: ParseMode.Html, cancellationToken: cancellationToken);
 
 				return;
 			}
@@ -63,13 +65,13 @@ public class ShowWeeksCommand : BaseCommand
 			var currentEducationWeekType = (EducationWeekTypes)currentInfo.CurrentWeekType;
 			var responceMessage = $"Выбери неделю для {name}:";
 
-            await ShowScheduleCommand.SendMessageWithButtonsAsync(_bot, message.Chat, responceMessage, id, (Roles)role, currentEducationWeekType, name);
+            await ShowScheduleCommand.SendMessageWithButtonsAsync(_bot, message.Chat, responceMessage, id, (Roles)role, currentEducationWeekType, name, cancellationToken);
 		}
-		catch (Exception ex)
+		catch 
 		{
-			_logger.LogError(ex, "Exception in {class}.{method}", nameof(ShowWeeksCommand), nameof(ExecuteAsync));
+			await _bot.SendTextMessageAsync(message.Chat, "<b>Не удалось отобразить учебные недели. Попробуйте позже</b>", parseMode: ParseMode.Html, cancellationToken: cancellationToken);
 
-			await _bot.SendTextMessageAsync(message.Chat, "<b>Не удалось отобразить учебные недели. Попробуйте позже</b>", parseMode: ParseMode.Html);
+			throw;
 		}
 	}
 }

@@ -17,8 +17,10 @@ public class AppUserService : IAppUserService
         _logger = logger;
     }
 
-    public async Task<AppUser> GetOrCreateAsync(long chatId)
+    public async Task<AppUser> GetOrCreateAsync(long chatId, CancellationToken ct = default)
     {
+        ct.ThrowIfCancellationRequested();
+
         try
         {
             var foundedUser = _userRepository.GetAll().FirstOrDefault(u => u.ChatId == chatId);
@@ -28,15 +30,16 @@ public class AppUserService : IAppUserService
 
             return foundedUser;
         }
-        catch (Exception ex)
+        catch
         {
-            _logger.LogError(ex, "Exception in {name}, Message: {message}",nameof(AppUserService.GetOrCreateAsync), ex.Message);
             throw;
         }
     }
 
-    public async Task UpdateAsync(UpdateAppUser update)
+    public async Task UpdateAsync(UpdateAppUser update, CancellationToken ct = default)
     {
+        ct.ThrowIfCancellationRequested();
+
         try
         {
             var foundedUser = _userRepository.GetAll().FirstOrDefault(u => u.ChatId == update.ChatId);
@@ -47,9 +50,9 @@ public class AppUserService : IAppUserService
             foundedUser.LooksAtTeachers = update.LooksAtTeachers;
             await _userRepository.UpdateAsync(foundedUser);            
         }
-        catch (Exception ex)
+        catch
         {
-            _logger.LogError(ex, "Exception in {Class}.{Method}, Message: {Message}", nameof(AppUserService), nameof(UpdateAsync), ex.Message);
+            throw;
         }
     }
 }
