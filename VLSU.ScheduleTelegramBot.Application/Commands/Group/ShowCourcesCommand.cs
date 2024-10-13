@@ -54,6 +54,13 @@ public class ShowCourcesCommand : BaseCommand
                 return;
             }
 
+            if (groups.Count == 0)
+            {
+                await _bot.SendTextMessageAsync(message.Chat, "<b>Группы не найдены</b>", parseMode: ParseMode.Html);
+
+                return;
+            }
+
             if (!int.TryParse(groups.Max(g => g.Course.Split(' ')[0]), out int maxCourse))
             {
                 _logger.LogWarning("The course number could not be converted: {args}", args?.ToString());

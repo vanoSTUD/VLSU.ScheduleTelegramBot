@@ -1,5 +1,4 @@
 ﻿using Telegram.Bot.Exceptions;
-using Telegram.Bot.Types.ReplyMarkups;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using VLSU.ScheduleTelegramBot.Application.Commands;
@@ -98,16 +97,5 @@ public class UpdateHandler : IUpdateHandler
         var args = command.Split(' ').Skip(1).ToArray();
 
 		await foundedCommand.ExecuteAsync(update, args);
-	}
-
-	private async Task<Message> SendInlineKeyboard(Message msg)
-	{
-		var inlineMarkup = new InlineKeyboardMarkup()
-			.AddNewRow("1.1", "1.2", "1.3")
-			.AddNewRow()
-				.AddButton("WithCallbackData", "CallbackData")
-				.AddButton(InlineKeyboardButton.WithUrl("WithUrl", "https://github.com/TelegramBots/Telegram.Bot"));
-
-		return await _bot.SendTextMessageAsync(msg.Chat, "Inline buttons:", replyMarkup: inlineMarkup);
 	}
 }

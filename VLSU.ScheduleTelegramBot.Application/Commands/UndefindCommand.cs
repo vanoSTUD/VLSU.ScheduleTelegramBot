@@ -1,5 +1,4 @@
 ﻿using Telegram.Bot.Types.Enums;
-using Telegram.Bot.Types.ReplyMarkups;
 using Telegram.Bot.Types;
 using Telegram.Bot;
 
@@ -21,7 +20,7 @@ public class UndefindCommand : BaseCommand
         if (update.Message is not { } message)
             return;
 
-        string responceMessage = $"Не распознал команду! Попробуй {CommandNames.Start}";
+        string responceMessage = $"Не распознал команду! \nПопробуй {CommandNames.Start}";
 
         await _bot.SendTextMessageAsync(message.Chat, responceMessage, parseMode: ParseMode.Html);
     }

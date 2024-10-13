@@ -71,7 +71,8 @@ public class ShowGroupsCommand : BaseCommand
                     inlineMarkup.AddNewRow();
 
                 var groupId = groups[i].Id;
-                var arguments = $"{groupId} {Roles.Group}";
+                var groupName = groups[i].Name;
+                var arguments = $"{groupId} {Roles.Group} {groupName}";
 
                 inlineMarkup.AddButton(groups[i].Name, $"{CommandNames.ShowWeeks} {arguments}");
             }

@@ -4,15 +4,12 @@ using VLSU.ScheduleTelegramBot.Domain.Responces;
 
 namespace VLSU.ScheduleTelegramBot.Application.Mappings.Profiles;
 
-public class GroupProfile
+public class GroupProfile : Profile
 {
-    public class InstituteProfiler : Profile
+    public GroupProfile()
     {
-        public InstituteProfiler()
-        {
-            CreateMap<GroupInfoResponce, Group>()
-                .ForMember(destination => destination.Id, opt =>
-                    opt.MapFrom(source => source.Nrec));
-        }
+        CreateMap<GroupInfoResponce, Group>()
+            .ForMember(destination => destination.Id, opt =>
+                opt.MapFrom(source => source.Nrec));
     }
 }

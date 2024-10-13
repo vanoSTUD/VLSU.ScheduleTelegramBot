@@ -2,7 +2,6 @@
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
-using VLSU.ScheduleTelegramBot.Domain.Enums;
 
 namespace VLSU.ScheduleTelegramBot.Application.Commands;
 
@@ -21,16 +20,16 @@ public class StartCommand : BaseCommand
 	{
 		Message? message = null;
 
-		if (update.Message is not null)
+		if (update?.Message != null)
 			message = update.Message;
-		else if (update?.CallbackQuery?.Message is not null)
+		else if (update?.CallbackQuery?.Message != null)
 			message = update.CallbackQuery.Message;
 
 		if (message == null)
 			return;
 
 		var userName = message.From?.FirstName;
-		string responceMessage = $"Привет{(userName is null ? "" : $", <b>{userName}</b>")}!\n";
+		string responceMessage = $"Привет{(userName == null ? "" : $", <b>{userName}</b>")}!\n";
         responceMessage += "Чье расписание смотрим?";
 
 		var inlineMarkup = new InlineKeyboardMarkup()

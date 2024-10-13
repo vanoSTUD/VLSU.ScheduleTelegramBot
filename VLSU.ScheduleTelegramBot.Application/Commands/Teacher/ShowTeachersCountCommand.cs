@@ -48,6 +48,12 @@ public class ShowTeachersCountCommand : BaseCommand
                 return;
             }
 
+            if (userText.Length < 3)
+            {
+                await _bot.SendTextMessageAsync(message.Chat, "Для поиска нужно минимум 3 буквы от ФИО преподавателя.", replyMarkup: stopMarkup);
+                return;
+            }
+
             var teachers = await vlsuApi.GetTeachersAsync(userText);
 
             if (teachers == null)

@@ -68,7 +68,8 @@ public class ShowTeachersCommand : BaseCommand
             for (int i = 0; i < teachers.Count; i++)
             {
                 var teacherId = teachers[i].Id;
-                var buttonArgs = $"{teacherId} {Roles.Teacher}";
+                var teacherName = teachers[i].GetShortName();
+                var buttonArgs = $"{teacherId} {Roles.Teacher} {teacherName}";
 
                 inlineMarkup.AddNewRow().AddButton(teachers[i].Fullname, $"{CommandNames.ShowWeeks} {buttonArgs}");
             }
