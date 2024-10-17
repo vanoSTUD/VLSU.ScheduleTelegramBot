@@ -3,15 +3,15 @@
 public static class CommandNames
 {
 	public const string Start = "/start";
-	public const string ShowInstitutes = "/institutes";
-	public const string ShowGroups = "/groups";
-	public const string ShowCourses = "/courses";
-	public const string ShowSchedule = "/schedule";
-	public const string ShowWeeks = "/weeks";
-	public const string FormEducation = "/forms";
-	public const string Undefind = "/undefind";
-	public const string FindTeacher = "/findTeachers";
-	public const string ShowTeachersCount = "/showTeachersCount";
-	public const string ShowTeachers = "/showTeachers";
-	public const string StopFindTeachers = "/stopFindTeachers";
+	public const string ShowInstitutes = "/1";
+	public const string ShowGroups = "/2";
+	public const string ShowCourses = "/3";
+	public const string ShowSchedule = "/4";
+	public const string ShowWeeks = "/5";
+	public const string FormEducation = "/6";
+	public const string Undefind = "/7";
+	public const string FindTeacher = "/8";
+	public const string ShowTeachersCount = "/9";
+	public const string ShowTeachers = "/0";
+	public const string StopFindTeachers = "/10";
 }

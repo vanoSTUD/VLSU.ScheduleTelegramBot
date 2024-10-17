@@ -14,7 +14,7 @@ var botConfigSection = configuration.GetSection(BotOptions.Section);
 builder.Services.Configure<BotOptions>(botConfigSection);
 builder.Services.Configure<VlsuApiOptions>(configuration.GetSection(VlsuApiOptions.Section));
 
-builder.Services.AddHttpClient("tgwebhook").RemoveAllLoggers().AddTypedClient<ITelegramBotClient>(
+builder.Services.AddHttpClient("webhook").RemoveAllLoggers().AddTypedClient<ITelegramBotClient>(
 	httpClient => new TelegramBotClient(botConfigSection.Get<BotOptions>()!.BotToken, httpClient));
 
 builder.Services.AddApplicationServices();

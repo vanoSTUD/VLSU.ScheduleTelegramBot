@@ -10,7 +10,6 @@ using VLSU.ScheduleTelegramBot.Domain.Enums;
 using VLSU.ScheduleTelegramBot.Domain.Contracts;
 using VLSU.ScheduleTelegramBot.Domain.Entities;
 using VLSU.ScheduleTelegramBot.Application.Commands.Group;
-using System.Threading;
 
 namespace VLSU.ScheduleTelegramBot.Application.Commands;
 

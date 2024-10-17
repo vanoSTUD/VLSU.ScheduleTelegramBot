@@ -66,14 +66,18 @@ public class ShowTeachersCommand : BaseCommand
             }
 
             var inlineMarkup = new InlineKeyboardMarkup();
+            var maxNameLength = 11;
 
             for (int i = 0; i < teachers.Count; i++)
             {
                 var teacherId = teachers[i].Id;
                 var teacherName = teachers[i].GetShortName();
-                var buttonArgs = $"{teacherId} {Roles.Teacher} {teacherName}";
 
-                inlineMarkup.AddNewRow().AddButton(teachers[i].Fullname, $"{CommandNames.ShowWeeks} {buttonArgs}");
+                if (teacherName.Length > maxNameLength)
+                    teacherName = new string(teacherName.Take(maxNameLength).ToArray());
+
+                var buttonArgs = $"{CommandNames.ShowWeeks} {teacherId} {(int)Roles.Teacher} {teacherName}";
+                inlineMarkup.AddNewRow().AddButton(teachers[i].Fullname, $"{buttonArgs}");
             }
 
             var responceMessage = "Выбери преподавателя: ";
@@ -83,7 +87,7 @@ public class ShowTeachersCommand : BaseCommand
         }
         catch
         {
-            await _bot.SendTextMessageAsync(message.Chat, "<b>Не удалось отобразить преподавателей :( \nПопробуйте позже</b>", parseMode: ParseMode.Html, cancellationToken: cancellationToken);
+            await _bot.SendTextMessageAsync(message.Chat, "<b>Не удалось отобразить преподавателей :( \nПопробуйте позже</b>", parseMode: ParseMode.Html);
 
             throw;
         }

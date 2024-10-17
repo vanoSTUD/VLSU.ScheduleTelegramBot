@@ -8,7 +8,7 @@ public class Teacher
     public string GetShortName()
     {
         var fullnameSplit = Fullname.Split(' ');
-        var shortName = $"{fullnameSplit[0]} {fullnameSplit[1].First()}. {fullnameSplit[2].First()}.";
+        var shortName = $"{fullnameSplit[1]} {fullnameSplit[0].First()}.";
 
         return shortName;
     }
