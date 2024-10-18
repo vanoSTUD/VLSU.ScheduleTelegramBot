@@ -28,12 +28,13 @@ Also you have to specify endpoint, to which Telegram will send new updates with 
 
 To make sure that the webhook was configured by us, you need to specify the secret data in the `SecretToken` parameter.
 The request from Telegram will contain the header "X-Telegram-Bot-Api-Secret-Token" with the secret token as the content, which will be processed in the **BotController**.
+More: [WebHook](https://core.telegram.org/bots/api#setwebhook)
 
 ```json
   "BotOptions": {
     "BotToken": "<Token from BotFather>",
     "BotWebhookUrl": "<Https url from Ngrok (Clo) or your VPS>",
-    "SecretToken": "Any-string"
+    "SecretToken": "<1-256 characters. Only characters A-Z, a-z, 0-9, '_' and '-' are allowed.>"
   },
 
   "ConnectionStrings": {
