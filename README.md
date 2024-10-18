@@ -26,14 +26,19 @@ Replace `BotToken` in **appsettings.json** with actual Bot token.
 
 Also you have to specify endpoint, to which Telegram will send new updates with `BotWebhookUrl` parameter.
 
-You can also replace the `SecretToken` with your any string.
+To make sure that the webhook was configured by us, you need to specify the secret data in the `SecretToken` parameter.
+The request from Telegram will contain the header "X-Telegram-Bot-Api-Secret-Token" with the secret token as the content, which will be processed in the **BotController**.
 
 ```json
-"BotConfiguration": {
-  "BotToken": "<Your bot token from BotFather>",
-  "BotWebhookUrl": "<Https Url from Ngrok or Clo>",
-  "SecretToken": "<Any-string>"
-}
+  "BotOptions": {
+    "BotToken": "<Token from BotFather>",
+    "BotWebhookUrl": "<Https url from Ngrok (Clo) or your VPS>",
+    "SecretToken": "Any-string"
+  },
+
+  "ConnectionStrings": {
+    "MSSql": "<Connection string to MS Sql Server>"
+  }
 ```
 
 ## Ngrok
@@ -59,7 +64,12 @@ Telegram API only supports the ports 443, 80, 88 or 8443. Feel free to change th
 ./clo publish http 8443
 ```
 
-### Run Bot
+## Run Bot
+
+You need to update the database with the command in the **Package Manager Сonsole**
+```shell
+Update-Database
+```
 
 Now you can start the Bot in a local instance. Check if the port of the application matches the port on which Ngrok (Clo) is running.
 
