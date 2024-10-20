@@ -19,12 +19,14 @@ public class VlsuApiService : IVlsuApiService
     private readonly ILogger<VlsuApiService> _logger;
     private readonly IScheduleMapper _scheduleMapper;
     private readonly IOptions<VlsuApiOptions> _options;
+    private readonly IHttpClientFactory _clientFactory;
 
-    public VlsuApiService(ILogger<VlsuApiService> logger, IScheduleMapper scheduleMapper, IOptions<VlsuApiOptions> options, IMapper mapper)
+    public VlsuApiService(ILogger<VlsuApiService> logger, IScheduleMapper scheduleMapper, IOptions<VlsuApiOptions> options, IMapper mapper, IHttpClientFactory clientFactory)
     {
         _mapper = mapper;
         _logger = logger;
         _options = options;
+        _clientFactory = clientFactory;
         _scheduleMapper = scheduleMapper;
     }
 
@@ -34,7 +36,7 @@ public class VlsuApiService : IVlsuApiService
 
         try
         {
-            using HttpClient client = new();
+            var client = _clientFactory.CreateClient();
             string requestUrl = _options.Value.GetGroups.AbsoluteUri;
             var requestBody = JsonContent.Create(new { Institut = instituteId, WFormed = educationForm });
 
@@ -58,7 +60,7 @@ public class VlsuApiService : IVlsuApiService
 
         try
         {
-            using HttpClient client = new();
+            var client = _clientFactory.CreateClient();
             string requestUrl = _options.Value.GetInstitutes.AbsoluteUri;
 
             var responseMessage = await client.GetAsync(requestUrl);
@@ -81,7 +83,7 @@ public class VlsuApiService : IVlsuApiService
 
         try
         {
-            using HttpClient client = new();
+            var client = _clientFactory.CreateClient();
             string requestUrl = _options.Value.GetTeachers.AbsoluteUri;
             string requestBody = FIO;
 
@@ -129,7 +131,7 @@ public class VlsuApiService : IVlsuApiService
 
         try
         {
-            using HttpClient client = new();
+            var client = _clientFactory.CreateClient();
             string requestBody = id.ToString();
 
             var responseMessage = await client.PostAsJsonAsync(sourceUri, requestBody);
@@ -152,7 +154,7 @@ public class VlsuApiService : IVlsuApiService
 
         try
         {
-            using HttpClient client = new();
+            var client = _clientFactory.CreateClient();
             var requestBody = JsonContent.Create(new { Nrec = id, WeekDays = weekDays, WeekType = weekType });
 
             var responseMessage = await client.PostAsync(sourceUri, requestBody);
