@@ -12,12 +12,10 @@ public class StopFindTeacherCommand : BaseCommand
 {
     private readonly ITelegramBotClient _bot;
     private readonly IServiceScopeFactory _scopeFactory;
-    private readonly ILogger<FindTeacherCommand> _logger;
 
-    public StopFindTeacherCommand(ITelegramBotClient bot, IServiceScopeFactory scopeFactory, ILogger<FindTeacherCommand> logger)
+    public StopFindTeacherCommand(ITelegramBotClient bot, IServiceScopeFactory scopeFactory)
     {
         _bot = bot;
-        _logger = logger;
         _scopeFactory = scopeFactory;
     }
 
@@ -32,25 +30,17 @@ public class StopFindTeacherCommand : BaseCommand
             if (callback.Message is not { } message)
                 return;
 
-            try
-            {
-                using var scope = _scopeFactory.CreateScope();
-                var userService = scope.ServiceProvider.GetRequiredService<IAppUserService>();
+            using var scope = _scopeFactory.CreateScope();
+            var userService = scope.ServiceProvider.GetRequiredService<IAppUserService>();
 
-                var user = await userService.GetOrCreateAsync(message.Chat.Id, cancellationToken);
-                await userService.UpdateAsync(new UpdateAppUser()
-                {
-                    ChatId = message.Chat.Id,
-                    LooksAtTeachers = false
-                });
-
-                await _bot.SendTextMessageAsync(message.Chat, "Поиск преподавателя остановлен", cancellationToken: cancellationToken);
-            }
-            catch
+            var user = await userService.GetOrCreateAsync(message.Chat.Id, cancellationToken);
+            await userService.UpdateAsync(new UpdateAppUser()
             {
-                throw;
-            }
+                ChatId = message.Chat.Id,
+                LooksAtTeachers = false
+            });
+
+            await _bot.SendTextMessageAsync(message.Chat, "Поиск преподавателя остановлен", cancellationToken: cancellationToken);
         }
-
     }
 }

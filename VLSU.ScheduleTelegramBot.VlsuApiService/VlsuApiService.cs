@@ -30,9 +30,9 @@ public class VlsuApiService : IVlsuApiService
         _scheduleMapper = scheduleMapper;
     }
 
-    public async Task<List<Group>?> GetGroupsAsync(long instituteId, int educationForm, CancellationToken ct = default)
+    public async Task<List<Group>?> GetGroupsAsync(long instituteId, int educationForm, CancellationToken cancellationToken = default)
     {
-        ct.ThrowIfCancellationRequested();
+        cancellationToken.ThrowIfCancellationRequested();
 
         try
         {
@@ -40,8 +40,8 @@ public class VlsuApiService : IVlsuApiService
             string requestUrl = _options.Value.GetGroups.AbsoluteUri;
             var requestBody = JsonContent.Create(new { Institut = instituteId, WFormed = educationForm });
 
-            var responseMessage = await client.PostAsync(requestUrl, requestBody);
-            var stringResponce = await responseMessage.Content.ReadAsStringAsync();
+            var responseMessage = await client.PostAsync(requestUrl, requestBody, cancellationToken);
+            var stringResponce = await responseMessage.Content.ReadAsStringAsync(cancellationToken);
             var responceGroups = JsonConvert.DeserializeObject<List<GroupInfoResponce>>(stringResponce);
 
             return _mapper.Map<List<Group>>(responceGroups);
@@ -54,17 +54,17 @@ public class VlsuApiService : IVlsuApiService
         }
     }
 
-    public async Task<List<Institute>?> GetInstitutesAsync(CancellationToken ct = default)
+    public async Task<List<Institute>?> GetInstitutesAsync(CancellationToken cancellationToken = default)
     {
-        ct.ThrowIfCancellationRequested();
+        cancellationToken.ThrowIfCancellationRequested();
 
         try
         {
             var client = _clientFactory.CreateClient();
             string requestUrl = _options.Value.GetInstitutes.AbsoluteUri;
 
-            var responseMessage = await client.GetAsync(requestUrl);
-            var responceString = await responseMessage.Content.ReadAsStringAsync();
+            var responseMessage = await client.GetAsync(requestUrl, cancellationToken);
+            var responceString = await responseMessage.Content.ReadAsStringAsync(cancellationToken);
             var responceInstitutes = JsonConvert.DeserializeObject<List<InstituteInfoResponce>>(responceString);
 
             return _mapper.Map<List<Institute>>(responceInstitutes);
@@ -77,9 +77,9 @@ public class VlsuApiService : IVlsuApiService
         }
     }
 
-    public async Task<List<Teacher>?> GetTeachersAsync(string FIO, CancellationToken ct = default)
+    public async Task<List<Teacher>?> GetTeachersAsync(string FIO, CancellationToken cancellationToken = default)
     {
-        ct.ThrowIfCancellationRequested();
+        cancellationToken.ThrowIfCancellationRequested();
 
         try
         {
@@ -87,8 +87,8 @@ public class VlsuApiService : IVlsuApiService
             string requestUrl = _options.Value.GetTeachers.AbsoluteUri;
             string requestBody = FIO;
 
-            var responseMessage = await client.PostAsJsonAsync(requestUrl, requestBody);
-            var responceString = await responseMessage.Content.ReadAsStringAsync();
+            var responseMessage = await client.PostAsJsonAsync(requestUrl, requestBody, cancellationToken);
+            var responceString = await responseMessage.Content.ReadAsStringAsync(cancellationToken);
             var responceTeachers = JsonConvert.DeserializeObject<List<TeacherInfoResponce>>(responceString);
 
             return _mapper.Map<List<Teacher>>(responceTeachers);
@@ -101,41 +101,41 @@ public class VlsuApiService : IVlsuApiService
         }
     }
 
-    public async Task<CurrentInfo?> GetCurrentInfoAsync(long id, Roles role, CancellationToken ct = default)
+    public async Task<CurrentInfo?> GetCurrentInfoAsync(long id, Roles role, CancellationToken cancellationToken = default)
     {
-        ct.ThrowIfCancellationRequested();
+        cancellationToken.ThrowIfCancellationRequested();
 
         return role switch
         {
-            Roles.Group => await GetCurrentInfoAsync(id, _options.Value.GetGroupInfo),
-            Roles.Teacher => await GetCurrentInfoAsync(id, _options.Value.GetTeacherInfo),
+            Roles.Group => await GetCurrentInfoAsync(id, _options.Value.GetGroupInfo, cancellationToken),
+            Roles.Teacher => await GetCurrentInfoAsync(id, _options.Value.GetTeacherInfo, cancellationToken),
             _ => null
         };
     }
 
-    public async Task<ScheduleForWeek?> GetScheduleAsync(long id, Roles role, int weekType = 0, string weekDays = "1,2,3,4,5,6", CancellationToken ct = default)
+    public async Task<ScheduleForWeek?> GetScheduleAsync(long id, Roles role, int weekType = 0, string weekDays = "1,2,3,4,5,6", CancellationToken cancellationToken = default)
     {
-        ct.ThrowIfCancellationRequested();
+        cancellationToken.ThrowIfCancellationRequested();
 
         return role switch
         {
-            Roles.Group => await GetScheduleAsync(id, _options.Value.GetGroupSchedule, weekType, weekDays),
-            Roles.Teacher => await GetScheduleAsync(id, _options.Value.GetTeacherSchedule, weekType, weekDays),
+            Roles.Group => await GetScheduleAsync(id, _options.Value.GetGroupSchedule, weekType, weekDays, cancellationToken),
+            Roles.Teacher => await GetScheduleAsync(id, _options.Value.GetTeacherSchedule, weekType, weekDays, cancellationToken),
             _ => null
         };
     }
 
-    private async Task<CurrentInfo?> GetCurrentInfoAsync(long id, Uri sourceUri, CancellationToken ct = default)
+    private async Task<CurrentInfo?> GetCurrentInfoAsync(long id, Uri sourceUri, CancellationToken cancellationToken = default)
     {
-        ct.ThrowIfCancellationRequested();
+        cancellationToken.ThrowIfCancellationRequested();
 
         try
         {
             var client = _clientFactory.CreateClient();
             string requestBody = id.ToString();
 
-            var responseMessage = await client.PostAsJsonAsync(sourceUri, requestBody);
-            var responceString = await responseMessage.Content.ReadAsStringAsync();
+            var responseMessage = await client.PostAsJsonAsync(sourceUri, requestBody, cancellationToken);
+            var responceString = await responseMessage.Content.ReadAsStringAsync(cancellationToken);
             var currentInfo = JsonConvert.DeserializeObject<CurrentInfo>(responceString);
 
             return currentInfo;
@@ -148,17 +148,17 @@ public class VlsuApiService : IVlsuApiService
         }
     }
 
-    private async Task<ScheduleForWeek?> GetScheduleAsync(long id, Uri sourceUri, int weekType = 0, string weekDays = "1,2,3,4,5,6", CancellationToken ct = default)
+    private async Task<ScheduleForWeek?> GetScheduleAsync(long id, Uri sourceUri, int weekType = 0, string weekDays = "1,2,3,4,5,6", CancellationToken cancellationToken = default)
     {
-        ct.ThrowIfCancellationRequested();
+        cancellationToken.ThrowIfCancellationRequested();
 
         try
         {
             var client = _clientFactory.CreateClient();
             var requestBody = JsonContent.Create(new { Nrec = id, WeekDays = weekDays, WeekType = weekType });
 
-            var responseMessage = await client.PostAsync(sourceUri, requestBody);
-            var stringResponce = await responseMessage.Content.ReadAsStringAsync();
+            var responseMessage = await client.PostAsync(sourceUri, requestBody, cancellationToken);
+            var stringResponce = await responseMessage.Content.ReadAsStringAsync(cancellationToken);
 
             if (string.IsNullOrEmpty(stringResponce))
                 return null;

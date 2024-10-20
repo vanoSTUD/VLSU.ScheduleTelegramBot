@@ -37,7 +37,7 @@ public class ShowInstitutesCommand : BaseCommand
         try
         {
             if (args == null ||
-                args.Length == 0 ||
+                args.Length < 1 ||
                 !Enum.TryParse(typeof(EducationForms), args[0], out var educationForm))
             {
                 _logger.LogWarning("Argument is not {type}. Args = {args}", nameof(EducationForms), args?.ToString());

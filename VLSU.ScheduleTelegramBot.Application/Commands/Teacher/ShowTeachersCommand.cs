@@ -37,7 +37,9 @@ public class ShowTeachersCommand : BaseCommand
 
         try
         {
-            if (args?[0] == null || string.IsNullOrEmpty(args[0]))
+            if (args == null ||
+                args.Length < 1 ||
+                string.IsNullOrEmpty(args[0]))
             {
                 _logger.LogWarning("Argument is null or empty. Args = {args}", args?.ToString());
 
@@ -83,7 +85,6 @@ public class ShowTeachersCommand : BaseCommand
             var responceMessage = "Выбери преподавателя: ";
 
             await _bot.SendTextMessageAsync(message.Chat, responceMessage, replyMarkup: inlineMarkup, parseMode: ParseMode.Html, cancellationToken: cancellationToken);
-
         }
         catch
         {

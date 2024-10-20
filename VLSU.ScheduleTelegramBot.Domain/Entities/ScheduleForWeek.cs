@@ -18,16 +18,16 @@ public class ScheduleForWeek
 }
 public class ScheduleForDay
 {
-    public ScheduleForDay(string dayOfWeek, WeekTypes weekType, List<Lesson> lessons, EducationWeekTypes educationWeekType)
+    public ScheduleForDay(string dayName, DayOfWeek dayOfWeek, List<Lesson> lessons, EducationWeekTypes educationWeekType)
     {
-        DayOfWeek = dayOfWeek;
+        DayName = dayName;
         Lessons = lessons;
         EducationWeekType = educationWeekType;
-        WeekType = weekType;
+        DayOfWeek = dayOfWeek;
     }
     
-    public WeekTypes WeekType { get; }
+    public DayOfWeek DayOfWeek { get; }
     public EducationWeekTypes EducationWeekType { get; }
-    public string DayOfWeek { get; }
+    public string DayName { get; }
     public List<Lesson> Lessons { get; }
 }

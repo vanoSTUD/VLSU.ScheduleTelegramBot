@@ -65,7 +65,7 @@ public class UpdateHandler : IUpdateHandler
 
 			await ExecuteCommandAsync(commandName, update, cancellationToken);
 		}
-        else if (user.LooksAtTeachers)
+        else if (user.FindsTeacherSchedule)
         {
             await _commands.First(command => command.Name == CommandNames.ShowTeachersCount).ExecuteAsync(update, cancellationToken);
             return;

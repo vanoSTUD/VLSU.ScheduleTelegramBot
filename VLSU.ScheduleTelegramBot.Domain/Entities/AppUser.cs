@@ -3,5 +3,5 @@
 public class AppUser
 {
     public long ChatId { get; set; }
-    public bool LooksAtTeachers { get; set; } = false;
+    public bool FindsTeacherSchedule { get; set; } = false;
 }

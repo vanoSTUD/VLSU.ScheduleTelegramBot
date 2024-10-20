@@ -110,8 +110,9 @@ public class ShowScheduleCommand : BaseCommand
 
         DateTime weekEndDate = weekBeginDate.AddDays(6);
         string weekName = "Текущая неделя";
+		bool isCurrentWeekType = educationWeekType == (EducationWeekTypes)currentInfo.CurrentWeekType;
 
-        if (educationWeekType != (EducationWeekTypes)currentInfo.CurrentWeekType)
+        if (isCurrentWeekType == false)
         {
             weekBeginDate = weekBeginDate.AddDays(7);
             weekEndDate = weekEndDate.AddDays(7);
@@ -129,12 +130,12 @@ public class ShowScheduleCommand : BaseCommand
 
         foreach (var currentSchedule in currentSchedules)
         {
-            scheduleMessage.AppendLine($"\n<blockquote expandable><u>{currentSchedule.DayOfWeek}</u>");
+            scheduleMessage.AppendLine($"\n<blockquote expandable><u>{currentSchedule.DayName}</u>");
             var lessons = currentSchedule.Lessons;
 
             foreach (var lesson in lessons)
             {
-                AppendLesson(scheduleMessage, lesson, lesson.Number);
+                AppendLesson(scheduleMessage, lesson, currentSchedule.DayOfWeek, isCurrentWeekType);
             }
 
             scheduleMessage.Append("</blockquote>");
@@ -143,7 +144,7 @@ public class ShowScheduleCommand : BaseCommand
 		return scheduleMessage.ToString();
     }
 
-	private static void AppendLesson(StringBuilder builder, Lesson lesson, int lessonNumber)
+	private static void AppendLesson(StringBuilder builder, Lesson lesson, DayOfWeek dayOfWeek, bool isCurrentWeekType)
 	{
 		if (lesson == null)
 			return;
@@ -151,6 +152,8 @@ public class ShowScheduleCommand : BaseCommand
 		string[] sportLessonNames = { "Элективные дисциплины по физической культуре", "Физическая культура и спорт" };
 		string defaultLessonType = "лк";
 		string lessonType = defaultLessonType;
+		string lessonSymbol = "➖";
+		string currentLessonSymbol = "♦️";
 
         if (lesson.Description.Contains(','))
 		{
@@ -158,11 +161,10 @@ public class ShowScheduleCommand : BaseCommand
 			lessonType = lessonDescriptionSplit[0];
         }
 
-		//🔬📝📌🛠🤸‍♀️
-		string emoji = lessonType switch
+        //🔬 📝 📌 🛠 🤸‍♀️ ➖ ♦️
+        string emoji = lessonType switch
 		{
 			"лк" => "📝",
-			"пр" => "📌",
 			"лб" => "🔬",
 			_ => "📝"
 		};
@@ -174,10 +176,25 @@ public class ShowScheduleCommand : BaseCommand
         var firstLessonStartTime = new TimeOnly(8, 30);
 		int lessonDuration = 90;
 		int restDuration = 20;
-		var lessonStartTime = firstLessonStartTime.AddMinutes((lessonDuration + restDuration) * (lessonNumber - 1));
+		var lessonStartTime = firstLessonStartTime.AddMinutes((lessonDuration + restDuration) * (lesson.Number - 1));
 		var lessonEndTime = lessonStartTime.AddMinutes(lessonDuration);
 
-		builder.AppendLine($"➖<b>{lessonNumber} пара ({lessonStartTime} - {lessonEndTime}): {emoji}</b>");
+        var vladimirTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Russian Standard Time");
+        var vladimirCurrentTime = TimeOnly.FromDateTime(TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, vladimirTimeZone));
+
+		// Проверка на текущее занятие
+        if (isCurrentWeekType &&
+            dayOfWeek == DateTime.UtcNow.DayOfWeek &&
+			vladimirCurrentTime >= lessonStartTime.AddMinutes(-restDuration) &&
+			vladimirCurrentTime <= lessonEndTime)
+        {
+            builder.AppendLine($"{currentLessonSymbol}<b>{lesson.Number} пара ({lessonStartTime} - {lessonEndTime}): {emoji}</b>");
+        }
+		else
+		{
+			builder.AppendLine($"{lessonSymbol}<b>{lesson.Number} пара ({lessonStartTime} - {lessonEndTime}): {emoji}</b>");
+		}
+
 		builder.AppendLine($"<i>{lesson.Description}</i>");
 	}
 }

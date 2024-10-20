@@ -36,9 +36,11 @@ public class ShowGroupsCommand : BaseCommand
 
         try
         {
-            if (!int.TryParse(args?[0], out int educationForm) ||
-                !long.TryParse(args?[1], out long instituteId) ||
-                args?[2] is not { } course)
+            if (args == null ||
+                args.Length < 3 ||                
+                !int.TryParse(args[0], out int educationForm) ||
+                !long.TryParse(args[1], out long instituteId) ||
+                args[2] is not { } course)
             {
                 _logger.LogWarning("Agguments are null: {args}", args?.ToString());
                 await _bot.SendTextMessageAsync(message.Chat, "<b>Не удалось отобразить группы. Попробуйте позже</b>", parseMode: ParseMode.Html, cancellationToken: cancellationToken);

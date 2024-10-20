@@ -4,7 +4,6 @@ using Telegram.Bot;
 using Microsoft.Extensions.DependencyInjection;
 using VLSU.ScheduleTelegramBot.Domain.Interfaces.Services;
 using VLSU.ScheduleTelegramBot.Domain.Dto;
-using Microsoft.Extensions.Logging;
 
 namespace VLSU.ScheduleTelegramBot.Application.Commands.Teacher;
 
@@ -12,12 +11,10 @@ public class FindTeacherCommand : BaseCommand
 {
     private readonly ITelegramBotClient _bot;
     private readonly IServiceScopeFactory _scopeFactory;
-    private readonly ILogger<FindTeacherCommand> _logger;
 
-    public FindTeacherCommand(ITelegramBotClient bot, IServiceScopeFactory scopeFactory, ILogger<FindTeacherCommand> logger)
+    public FindTeacherCommand(ITelegramBotClient bot, IServiceScopeFactory scopeFactory)
     {
         _bot = bot;
-        _logger = logger;
         _scopeFactory = scopeFactory;
     }
 
@@ -27,7 +24,10 @@ public class FindTeacherCommand : BaseCommand
     {
         cancellationToken.ThrowIfCancellationRequested();
 
-        if (update.CallbackQuery?.Message is not { } message)
+        if (update.CallbackQuery is not { } callback)
+            return;
+
+        if (callback.Message is not { } message)
             return;
 
         try

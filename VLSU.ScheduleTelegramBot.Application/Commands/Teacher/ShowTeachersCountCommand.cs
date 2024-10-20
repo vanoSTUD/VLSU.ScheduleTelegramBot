@@ -44,7 +44,7 @@ public class ShowTeachersCountCommand : BaseCommand
 
             var user = await userService.GetOrCreateAsync(message.Chat.Id, cancellationToken);
 
-            if (user.LooksAtTeachers == false)
+            if (user.FindsTeacherSchedule == false)
             {
                 _logger.LogWarning("ShowTeachersCommand was called without the AppUser.LooksAtTeachers value. User: {user}", user.ChatId);
                 return;
@@ -79,7 +79,7 @@ public class ShowTeachersCountCommand : BaseCommand
 
             string buttonArgs = userText;
             var inlineMarkup = new InlineKeyboardMarkup()
-                .AddNewRow().AddButton($"Открыть", $"{CommandNames.ShowTeachers} {buttonArgs}")
+                .AddNewRow().AddButton($"Просмотр", $"{CommandNames.ShowTeachers} {buttonArgs}")
                 .AddNewRow().AddButton(stopButton);
 
             await _bot.SendTextMessageAsync(message.Chat, responceMessage, replyMarkup: inlineMarkup, parseMode: ParseMode.Html, cancellationToken: cancellationToken);

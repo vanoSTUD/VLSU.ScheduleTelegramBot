@@ -35,8 +35,10 @@ public class ShowCourcesCommand : BaseCommand
 
         try
         {
-            if (!int.TryParse(args?[0], out int educationForm) ||
-                !long.TryParse(args?[1], out long instituteId))
+            if (args == null ||
+                args.Length < 2 ||
+                !int.TryParse(args[0], out int educationForm) ||
+                !long.TryParse(args[1], out long instituteId))
             {
                 _logger.LogWarning("Agguments are null: {args}", args?.ToString());
                 await _bot.SendTextMessageAsync(message.Chat, "<b>Не удалось отобразить курсы. Попробуйте позже</b>", parseMode: ParseMode.Html, cancellationToken: cancellationToken);

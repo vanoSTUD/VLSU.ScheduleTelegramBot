@@ -47,7 +47,7 @@ public class AppUserService : IAppUserService
             if (foundedUser == null)
                 foundedUser = await _userRepository.CreateAsync(new AppUser() { ChatId = update.ChatId});
 
-            foundedUser.LooksAtTeachers = update.LooksAtTeachers;
+            foundedUser.FindsTeacherSchedule = update.LooksAtTeachers;
             await _userRepository.UpdateAsync(foundedUser);            
         }
         catch
