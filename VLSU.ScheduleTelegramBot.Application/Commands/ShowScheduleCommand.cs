@@ -79,7 +79,6 @@ public class ShowScheduleCommand : BaseCommand
 			var scheduleMessage = GetScheduleMessage((EducationWeekTypes)educationWeekType, currentInfo, schedule, name);
 
 			await SendMessageWithButtonsAsync(_bot, message.Chat.Id, scheduleMessage, id, (Roles)role, (EducationWeekTypes)currentInfo!.CurrentWeekType, name, cancellationToken);
-
 		}
 		catch 
 		{

@@ -48,6 +48,8 @@ public class ShowWeeksCommand : BaseCommand
 				return;
 			}
 
+			MessageEntity messageEntity = new MessageEntity();
+
 			using var scope = _scopeFactory.CreateScope();
 			var vlsuApi = scope.ServiceProvider.GetRequiredService<IVlsuApiService>();
 
