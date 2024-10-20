@@ -6,13 +6,16 @@ This Telegram bot works with the VLSU API and provides information about the cla
 This project works with the [Telegram.Bot](https://github.com/TelegramBots/Telegram.Bot) library
 
 ## Preview
-### Finding a schedule for a group
-
-https://github.com/user-attachments/assets/c10c02a3-fc21-43fc-a357-b5622ef34f69
-
-### Finding a schedule for a teacher
-
-https://github.com/user-attachments/assets/dcf0edc5-0fc0-4389-b4aa-e37b79fc1d6b
+<details>
+  <summary>Finding a schedule for a group</summary>
+  
+  https://github.com/user-attachments/assets/c10c02a3-fc21-43fc-a357-b5622ef34f69
+</details>
+<details>
+  <summary>Finding a schedule for a teacher</summary>
+  
+  https://github.com/user-attachments/assets/dcf0edc5-0fc0-4389-b4aa-e37b79fc1d6b
+</details>
 
 ## Setup
 
