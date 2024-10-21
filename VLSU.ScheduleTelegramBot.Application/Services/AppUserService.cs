@@ -21,38 +21,25 @@ public class AppUserService : IAppUserService
     {
         ct.ThrowIfCancellationRequested();
 
-        try
-        {
-            var foundedUser = _userRepository.GetAll().FirstOrDefault(u => u.ChatId == chatId);
+        var foundedUser = _userRepository.GetAll().FirstOrDefault(u => u.ChatId == chatId);
 
-            if (foundedUser == null)
-                foundedUser = await _userRepository.CreateAsync(new AppUser() { ChatId = chatId });
+        if (foundedUser == null)
+            foundedUser = await _userRepository.CreateAsync(new AppUser() { ChatId = chatId });
 
-            return foundedUser;
-        }
-        catch
-        {
-            throw;
-        }
+        return foundedUser;
+
     }
 
     public async Task UpdateAsync(UpdateAppUser update, CancellationToken ct = default)
     {
         ct.ThrowIfCancellationRequested();
 
-        try
-        {
-            var foundedUser = _userRepository.GetAll().FirstOrDefault(u => u.ChatId == update.ChatId);
+        var foundedUser = _userRepository.GetAll().FirstOrDefault(u => u.ChatId == update.ChatId);
 
-            if (foundedUser == null)
-                foundedUser = await _userRepository.CreateAsync(new AppUser() { ChatId = update.ChatId});
+        if (foundedUser == null)
+            foundedUser = await _userRepository.CreateAsync(new AppUser() { ChatId = update.ChatId});
 
-            foundedUser.FindsTeacherSchedule = update.LooksAtTeachers;
-            await _userRepository.UpdateAsync(foundedUser);            
-        }
-        catch
-        {
-            throw;
-        }
+        foundedUser.FindsTeacherSchedule = update.LooksAtTeachers;
+        await _userRepository.UpdateAsync(foundedUser);            
     }
 }

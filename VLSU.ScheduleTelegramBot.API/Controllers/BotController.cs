@@ -8,12 +8,19 @@ namespace VLSU.ScheduleTelegramBot.API;
 
 [ApiController]
 [Route("")]
-public class BotController(IOptions<BotOptions> Config) : ControllerBase
+public class BotController : ControllerBase
 {
-	[HttpPost]
+	private readonly IOptions<BotOptions> _options;
+
+    public BotController(IOptions<BotOptions> options)
+    {
+        _options = options;
+    }
+
+    [HttpPost]
 	public async Task<IActionResult> HandleUpdate([FromBody] Update update, [FromServices] ITelegramBotClient bot, [FromServices] UpdateHandler handleUpdateService, CancellationToken ct)
 	{
-		if (Request.Headers["X-Telegram-Bot-Api-Secret-Token"] != Config.Value.SecretToken)
+		if (Request.Headers["X-Telegram-Bot-Api-Secret-Token"] != _options.Value.SecretToken)
 			return Forbid();
 
 		try

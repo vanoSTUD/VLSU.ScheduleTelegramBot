@@ -46,12 +46,13 @@ public class VlsuApiService : IVlsuApiService
 
             return _mapper.Map<List<Group>>(responceGroups);
         }
-        catch 
+        catch(Exception ex)
         {
-            return null;
+            _logger.LogError("Exception: {ex}", ex.Message);
 
-            throw;
+            return null;
         }
+
     }
 
     public async Task<List<Institute>?> GetInstitutesAsync(CancellationToken cancellationToken = default)
@@ -69,11 +70,11 @@ public class VlsuApiService : IVlsuApiService
 
             return _mapper.Map<List<Institute>>(responceInstitutes);
         }
-        catch
+        catch (Exception ex)
         {
-            return null;
+            _logger.LogError("Exception: {ex}", ex.Message);
 
-            throw;
+            return null;
         }
     }
 
@@ -93,11 +94,11 @@ public class VlsuApiService : IVlsuApiService
 
             return _mapper.Map<List<Teacher>>(responceTeachers);
         }
-        catch
+        catch (Exception ex)
         {
-            return null;
+            _logger.LogError("Exception: {ex}", ex.Message);
 
-            throw;
+            return null;
         }
     }
 
@@ -140,11 +141,11 @@ public class VlsuApiService : IVlsuApiService
 
             return currentInfo;
         }
-        catch 
+        catch (Exception ex)
         {
-            return null;
+            _logger.LogError("Exception: {ex}", ex.Message);
 
-            throw;
+            return null;
         }
     }
 
@@ -172,11 +173,11 @@ public class VlsuApiService : IVlsuApiService
 
             return scheduleForWeek;
         }
-        catch
+        catch (Exception ex)
         {
-            return null;
+            _logger.LogError("Exception: {ex}", ex.Message);
 
-            throw;
+            return null;
         }
     }
 }
