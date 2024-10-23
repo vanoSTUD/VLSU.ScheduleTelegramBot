@@ -42,11 +42,19 @@ public class ShowTeachersCountCommand : BaseCommand
             var userService = scope.ServiceProvider.GetRequiredService<IAppUserService>();
             var vlsuApi = scope.ServiceProvider.GetRequiredService<IVlsuApiService>();
 
-            var user = await userService.GetOrCreateAsync(message.Chat.Id, cancellationToken);
+            var userResult = await userService.GetOrCreateAsync(message.Chat.Id, cancellationToken);
 
-            if (user.FindsTeacherSchedule == false)
+            if (userResult.IsFailure)
             {
-                _logger.LogWarning("ShowTeachersCommand was called without the AppUser.LooksAtTeachers value. User: {user}", user.ChatId);
+                _logger.LogWarning("VlsuApi returns faulure AppUser. User: {id}", message.Chat.Id);
+                await _bot.SendTextMessageAsync(message.Chat, "Поиск преподавателя в данный момент недоступен :( \nПопробуйте позже.", replyMarkup: stopMarkup, cancellationToken: cancellationToken);
+
+                return;
+            }
+
+            if (userResult.Value!.FindsTeacherSchedule == false)
+            {
+                _logger.LogWarning("ShowTeachersCommand was called without the AppUser.LooksAtTeachers value. User: {user}", userResult.Value.ChatId);
                 return;
             }
 
@@ -56,23 +64,17 @@ public class ShowTeachersCountCommand : BaseCommand
                 return;
             }
 
-            var teachers = await vlsuApi.GetTeachersAsync(userText, cancellationToken);
+            var teachersResult = await vlsuApi.GetTeachersAsync(userText, cancellationToken);
 
-            if (teachers == null)
+            if (teachersResult.IsFailure)
             {
-                await _bot.SendTextMessageAsync(message.Chat, "Не удалось получить данные :( \nПопробуйте позже", replyMarkup: stopMarkup, cancellationToken: cancellationToken);
+                await _bot.SendTextMessageAsync(message.Chat, $"{teachersResult.ErrorMessage}", replyMarkup: stopMarkup, cancellationToken: cancellationToken);
                 return;
             }
 
-            if (teachers.Count == 0)
-            {
-                await _bot.SendTextMessageAsync(message.Chat, $"Препрдаватели с совпадением '{userText}' не найдены", replyMarkup: stopMarkup, cancellationToken: cancellationToken);
-                return;
-            }
+            string responceMessage = $"Найдено преподавателей - {teachersResult.Value!.Count}. ";
 
-            string responceMessage = $"Найдено преподавателей - {teachers.Count}. ";
-
-            if (teachers.Count > 10)
+            if (teachersResult.Value!.Count > 10)
                 responceMessage += "Можешь их посмотреть или ввести более конкретные данные";
             else
                 responceMessage += "Можешь их открыть, нажав на кнопку ниже";

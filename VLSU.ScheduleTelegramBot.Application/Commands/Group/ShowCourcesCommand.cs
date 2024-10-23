@@ -48,32 +48,19 @@ public class ShowCourcesCommand : BaseCommand
 
             using var scope = _scopeFactory.CreateScope();
             var vlsuApi = scope.ServiceProvider.GetRequiredService<IVlsuApiService>();
-            var groups = await vlsuApi.GetGroupsAsync(instituteId, educationForm, cancellationToken);
 
-            if (groups == null)
+            var groupsResult = await vlsuApi.GetGroupsAsync(instituteId, educationForm, cancellationToken);
+
+            if (groupsResult.IsFailure)
             {
                 _logger.LogWarning("Groups are null: {args}", args?.ToString());
-                await _bot.SendTextMessageAsync(message.Chat, "<b>Не удалось отобразить курсы. Попробуйте позже</b>", parseMode: ParseMode.Html, cancellationToken: cancellationToken);
-
-                return;
-            }
-
-            if (groups.Count == 0)
-            {
-                await _bot.SendTextMessageAsync(message.Chat, "<b>Группы не найдены</b>", parseMode: ParseMode.Html, cancellationToken: cancellationToken);
-
-                return;
-            }
-
-            if (!int.TryParse(groups.Max(g => g.Course.Split(' ')[0]), out int maxCourse))
-            {
-                _logger.LogWarning("The course number could not be converted: {args}", args?.ToString());
-                await _bot.SendTextMessageAsync(message.Chat, "<b>Не удалось отобразить курсы. Попробуйте позже</b>", parseMode: ParseMode.Html, cancellationToken: cancellationToken);
+                await _bot.SendTextMessageAsync(message.Chat, $"<b>{groupsResult.ErrorMessage}</b>", parseMode: ParseMode.Html, cancellationToken: cancellationToken);
 
                 return;
             }
 
             var inlineMarkup = new InlineKeyboardMarkup();
+            int maxCourse = int.Parse(groupsResult.Value!.Max(g => g.Course.Split(' ')[0])!);
 
             for (int i = 0; i < maxCourse; i++)
             {

@@ -33,11 +33,10 @@ public class StopFindTeacherCommand : BaseCommand
             using var scope = _scopeFactory.CreateScope();
             var userService = scope.ServiceProvider.GetRequiredService<IAppUserService>();
 
-            var user = await userService.GetOrCreateAsync(message.Chat.Id, cancellationToken);
             await userService.UpdateAsync(new UpdateAppUser()
             {
                 ChatId = message.Chat.Id,
-                LooksAtTeachers = false
+                FindsTeacherSchedule = false
             });
 
             await _bot.SendTextMessageAsync(message.Chat, "Поиск преподавателя остановлен", cancellationToken: cancellationToken);

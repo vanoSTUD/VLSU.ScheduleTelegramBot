@@ -39,7 +39,7 @@ public class FindTeacherCommand : BaseCommand
             await userService.UpdateAsync(new UpdateAppUser()
             {
                 ChatId = message.Chat.Id,
-                LooksAtTeachers = true
+                FindsTeacherSchedule = true
             }, cancellationToken);
 
             var responceMessage = $"""
@@ -50,7 +50,7 @@ public class FindTeacherCommand : BaseCommand
         }
         catch 
         {
-            await _bot.SendTextMessageAsync(message.Chat, "Не удалось получить данные от сервера :( \nПопробуйте позже", parseMode: ParseMode.Html, cancellationToken: cancellationToken);
+            await _bot.SendTextMessageAsync(message.Chat, "Не удалось получить данные :( \nПопробуйте позже", parseMode: ParseMode.Html, cancellationToken: cancellationToken);
 
             throw;
         }

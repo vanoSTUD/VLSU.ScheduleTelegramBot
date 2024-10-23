@@ -8,8 +8,11 @@ namespace VLSU.ScheduleTelegramBot.Application.Mappings.CustomMappers;
 
 public class SheduleMapper : IScheduleMapper
 {
-    public ScheduleForWeek Map(List<ScheduleResponce> schedulesResponce)
+    public ScheduleForWeek? Map(List<ScheduleResponce>? schedulesResponce)
     {
+        if (schedulesResponce == null)
+            return null;
+
         var schedulesForDays = new List<ScheduleForDay>();
         var scheduleResponceProperties = typeof(ScheduleResponce).GetProperties();
 

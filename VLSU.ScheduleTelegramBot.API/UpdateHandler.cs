@@ -57,7 +57,7 @@ public class UpdateHandler : IUpdateHandler
 
 		using var scope = _scopeFactory.CreateScope();
 		var userService = scope.ServiceProvider.GetRequiredService<IAppUserService>();
-		var user = await userService.GetOrCreateAsync(message.Chat.Id);
+		var userResult = await userService.GetOrCreateAsync(message.Chat.Id, cancellationToken);
 
 		if (messageText.StartsWith('/'))
 		{
@@ -65,7 +65,7 @@ public class UpdateHandler : IUpdateHandler
 
 			await ExecuteCommandAsync(commandName, update, cancellationToken);
 		}
-        else if (user.FindsTeacherSchedule)
+        else if (userResult.IsSuccess && userResult.Value!.FindsTeacherSchedule)
         {
             await _commands.First(command => command.Name == CommandNames.ShowTeachersCount).ExecuteAsync(update, cancellationToken);
             return;

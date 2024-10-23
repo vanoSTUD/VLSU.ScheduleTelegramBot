@@ -53,20 +53,15 @@ public class ShowTeachersCommand : BaseCommand
             var user = await userService.GetOrCreateAsync(message.Chat.Id, cancellationToken);
 
             var userText = string.Join(" ", args);
-            var teachers = await vlsuApi.GetTeachersAsync(userText, cancellationToken);
+            var teachersResult = await vlsuApi.GetTeachersAsync(userText, cancellationToken);
 
-            if (teachers == null)
+            if (teachersResult.IsFailure)
             {
-                await _bot.SendTextMessageAsync(message.Chat, "Не удалось получить данные :( \nПопробуйте позже", parseMode: ParseMode.Html, cancellationToken: cancellationToken);
+                await _bot.SendTextMessageAsync(message.Chat, $"{teachersResult.ErrorMessage}", parseMode: ParseMode.Html, cancellationToken: cancellationToken);
                 return;
             }
 
-            if (teachers.Count == 0)
-            {
-                await _bot.SendTextMessageAsync(message.Chat, $"Препрдаватели с совпадением '{userText}' не найдены", parseMode: ParseMode.Html, cancellationToken: cancellationToken);
-                return;
-            }
-
+            var teachers = teachersResult.Value!;
             var inlineMarkup = new InlineKeyboardMarkup();
             var maxNameLength = 11;
 

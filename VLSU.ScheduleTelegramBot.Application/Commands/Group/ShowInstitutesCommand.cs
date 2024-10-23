@@ -48,25 +48,18 @@ public class ShowInstitutesCommand : BaseCommand
             using var scope = _scopeFactory.CreateScope();
             var vlsuApi = scope.ServiceProvider.GetRequiredService<IVlsuApiService>();
 
-            var institutes = await vlsuApi.GetInstitutesAsync(cancellationToken);
+            var institutesResponce = await vlsuApi.GetInstitutesAsync(cancellationToken);
 
-            if (institutes == null)
+            if (institutesResponce.IsFailure)
             {
-                await _bot.SendTextMessageAsync(message.Chat, "<b>Не удалось отобразить институты. Попробуйте позже</b>", parseMode: ParseMode.Html, cancellationToken: cancellationToken);
-                _logger.LogWarning("Institutes are null. Args = {args}", args?.ToString());
-
-                return;
-            }
-
-            if (institutes.Count == 0)
-            {
-                await _bot.SendTextMessageAsync(message.Chat, "<b>Не удалось отобразить институты. Попробуйте позже</b>", parseMode: ParseMode.Html, cancellationToken: cancellationToken);
-                _logger.LogDebug("Vlsu api returns count = 0. Args = {args}", args?.ToString());
+                _logger.LogWarning("Institutes returns {output}. Args = {args}", institutesResponce.ErrorMessage, args?.ToString());
+                await _bot.SendTextMessageAsync(message.Chat, $"<b>{institutesResponce.ErrorMessage} \nПопробуйте позже</b>", parseMode: ParseMode.Html, cancellationToken: cancellationToken);
 
                 return;
             }
 
             var inlineMarkup = new InlineKeyboardMarkup();
+            var institutes = institutesResponce.Value!;
 
             for (int i = 0; i < institutes.Count; i++)
             {

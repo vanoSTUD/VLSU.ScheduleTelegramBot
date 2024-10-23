@@ -56,29 +56,29 @@ public class ShowScheduleCommand : BaseCommand
 			using var scope = _scopeFactory.CreateScope();
 			var vlsuApi = scope.ServiceProvider.GetRequiredService<IVlsuApiService>();
 
-			var schedule = await vlsuApi.GetScheduleAsync(id, (Roles)role, ct: cancellationToken);
-			var currentInfo = await vlsuApi.GetCurrentInfoAsync(id, (Roles)role, cancellationToken);
+			var scheduleResult = await vlsuApi.GetScheduleAsync(id, (Roles)role, ct: cancellationToken);
+			var currentInfoResult = await vlsuApi.GetCurrentInfoAsync(id, (Roles)role, cancellationToken);
 			var name = string.Join(' ', args.Skip(3));
 
-            if (schedule == null)
+            if (scheduleResult.IsFailure)
 			{
-				_logger.LogWarning("Vlsu Api returns null: Id = {id}, Role = {role}", id, role);
-				await _bot.SendTextMessageAsync(message.Chat, $"<b>Расписание на эту неделю не найдено</b>", parseMode: ParseMode.Html, cancellationToken: cancellationToken);
+				_logger.LogWarning("Vlsu Api returns failure Schedule: Id = {id}, Role = {role}", id, role);
+				await _bot.SendTextMessageAsync(message.Chat, $"<b>{scheduleResult.ErrorMessage}</b>", parseMode: ParseMode.Html, cancellationToken: cancellationToken);
 
 				return;
 			}
 
-			if (currentInfo == null)
+			if (currentInfoResult.IsFailure)
 			{
-                _logger.LogError("Vlsu Api returns null: Id = {id}", id);
-                await _bot.SendTextMessageAsync(message.Chat, $"<b>Ошибка в получении расписания :( \nПопробуйте позже</b>", parseMode: ParseMode.Html, cancellationToken: cancellationToken);
+                _logger.LogError("Vlsu Api returns failure CurrentInfo: Id = {id}", id);
+                await _bot.SendTextMessageAsync(message.Chat, $"<b>{currentInfoResult.ErrorMessage}</b>", parseMode: ParseMode.Html, cancellationToken: cancellationToken);
 
                 return;
             }
 
-			var scheduleMessage = GetScheduleMessage((EducationWeekTypes)educationWeekType, currentInfo, schedule, name);
+			var scheduleMessage = GetScheduleMessage((EducationWeekTypes)educationWeekType, currentInfoResult.Value!, scheduleResult.Value!, name);
 
-			await SendMessageWithButtonsAsync(_bot, message.Chat.Id, scheduleMessage, id, (Roles)role, (EducationWeekTypes)currentInfo!.CurrentWeekType, name, cancellationToken);
+			await SendMessageWithButtonsAsync(_bot, message.Chat.Id, scheduleMessage, id, (Roles)role, (EducationWeekTypes)currentInfoResult.Value!.CurrentWeekType, name, cancellationToken);
 		}
 		catch 
 		{

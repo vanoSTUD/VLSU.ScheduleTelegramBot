@@ -5,5 +5,5 @@ namespace VLSU.ScheduleTelegramBot.Domain.Interfaces.Mappings;
 
 public interface IScheduleMapper
 {
-    public ScheduleForWeek Map(List<ScheduleResponce> schedulesResponce);
+    public ScheduleForWeek? Map(List<ScheduleResponce>? schedulesResponce);
 }

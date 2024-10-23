@@ -50,24 +50,18 @@ public class ShowGroupsCommand : BaseCommand
 
             using var scope = _scopeFactory.CreateScope();
             var vlsuApi = scope.ServiceProvider.GetRequiredService<IVlsuApiService>();
-            var foundedGroups = await vlsuApi.GetGroupsAsync(instituteId, educationForm, cancellationToken);
+            var groupsResult = await vlsuApi.GetGroupsAsync(instituteId, educationForm, cancellationToken);
 
-            if (foundedGroups == null)
+            if (groupsResult.IsFailure)
             {
-                _logger.LogWarning("Groups are null: {args}", args?.ToString());
-                await _bot.SendTextMessageAsync(message.Chat, "<b>Не удалось отобразить группы. Попробуйте позже</b>", parseMode: ParseMode.Html, cancellationToken: cancellationToken);
-                return;
-            }
+                _logger.LogWarning("VlsuApi returns failure Groups. Args: {args}", args?.ToString());
+                await _bot.SendTextMessageAsync(message.Chat, $"<b>{groupsResult.ErrorMessage}</b>", parseMode: ParseMode.Html, cancellationToken: cancellationToken);
 
-            var groups = foundedGroups.Where(g => g.Course.StartsWith(course)).ToList();
-
-            if (groups.Count == 0)
-            {
-                await _bot.SendTextMessageAsync(message.Chat, "<b>Группы отсутствуют в данной выборке</b>", parseMode: ParseMode.Html, cancellationToken: cancellationToken);
                 return;
             }
 
             var inlineMarkup = new InlineKeyboardMarkup();
+            var groups = groupsResult.Value!.Where(g => g.Course.StartsWith(course)).ToList();
 
             for (int i = 0; i < groups.Count; i++)
             {

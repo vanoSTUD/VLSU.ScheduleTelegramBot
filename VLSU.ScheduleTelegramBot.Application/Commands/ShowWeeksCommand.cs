@@ -48,23 +48,21 @@ public class ShowWeeksCommand : BaseCommand
 				return;
 			}
 
-			MessageEntity messageEntity = new MessageEntity();
-
 			using var scope = _scopeFactory.CreateScope();
 			var vlsuApi = scope.ServiceProvider.GetRequiredService<IVlsuApiService>();
 
-            var currentInfo = await vlsuApi.GetCurrentInfoAsync(id, (Roles)role, cancellationToken);
+            var currentInfoResult = await vlsuApi.GetCurrentInfoAsync(id, (Roles)role, cancellationToken);
 			var name = string.Join(' ',args.Skip(2));
 
-            if (currentInfo == null)
+            if (currentInfoResult.IsFailure)
 			{
-				_logger.LogWarning("Vlsu Api returns null: {args}", args?.ToString());
-				await _bot.SendTextMessageAsync(message.Chat, "<b>Не удалось отобразить учебные недели. Попробуйте позже</b>", parseMode: ParseMode.Html, cancellationToken: cancellationToken);
+				_logger.LogWarning("Vlsu Api returns failure. Args: {args}", args?.ToString());
+				await _bot.SendTextMessageAsync(message.Chat, $"<b>{currentInfoResult.ErrorMessage}</b>", parseMode: ParseMode.Html, cancellationToken: cancellationToken);
 
 				return;
 			}
 
-			var currentEducationWeekType = (EducationWeekTypes)currentInfo.CurrentWeekType;
+			var currentEducationWeekType = (EducationWeekTypes)currentInfoResult.Value!.CurrentWeekType;
 			var responceMessage = $"Выбери неделю для {name}:";
 
             await ShowScheduleCommand.SendMessageWithButtonsAsync(_bot, message.Chat, responceMessage, id, (Roles)role, currentEducationWeekType, name, cancellationToken);
